@@ -1,0 +1,3219 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Maquette 3D Interactive & Visite Immersive — Appartement Villers-sur-Mer (Lot n° 4)</title>
+  <style>
+    :root {
+      --bg-parchment: #FAF7F2;
+      --ink-dark: #1E293B;
+      --ink-muted: #475569;
+      --accent-terracotta: #8C4E33;
+      --accent-teal: #2E6F65;
+      --accent-blue: #4A7C9B;
+      --card-bg: rgba(250, 247, 242, 0.94);
+      --border-soft: #DCD3C2;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    body {
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background: #E8EEF2;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      color: var(--ink-dark);
+    }
+
+    #canvas-container {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+    }
+
+    /* TOP BAR */
+    .top-bar {
+      position: absolute;
+      top: 12px;
+      left: 14px;
+      right: 14px;
+      z-index: 10;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      pointer-events: none;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .brand-card {
+      pointer-events: auto;
+      background: var(--card-bg);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1.5px solid var(--border-soft);
+      border-radius: 16px;
+      padding: 11px 16px;
+      box-shadow: 0 10px 28px rgba(15, 23, 42, 0.10);
+      max-width: 440px;
+    }
+
+    .brand-eyebrow {
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--accent-terracotta);
+      margin-bottom: 3px;
+    }
+
+    .brand-title {
+      font-size: 15.5px;
+      font-weight: 800;
+      color: var(--ink-dark);
+      line-height: 1.2;
+    }
+
+    .brand-sub {
+      font-size: 11px;
+      color: var(--ink-muted);
+      margin-top: 3px;
+      line-height: 1.35;
+    }
+
+    /* MODE SWITCHER (ACTUEL 1970 vs PROJET RENOVE + MARCHE IMMERSIVE) */
+    .center-top-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      pointer-events: none;
+    }
+
+    .mode-switcher-card {
+      pointer-events: auto;
+      background: var(--card-bg);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1.5px solid var(--border-soft);
+      border-radius: 999px;
+      padding: 5px;
+      display: flex;
+      gap: 5px;
+      box-shadow: 0 10px 28px rgba(15, 23, 42, 0.12);
+    }
+
+    .mode-btn {
+      border: none;
+      background: transparent;
+      color: var(--ink-muted);
+      font-size: 11.5px;
+      font-weight: 800;
+      padding: 8px 15px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .mode-btn.active-actuel {
+      background: var(--accent-terracotta);
+      color: #FFFFFF;
+      box-shadow: 0 4px 12px rgba(140, 78, 51, 0.35);
+    }
+
+    .mode-btn.active-renove {
+      background: var(--accent-teal);
+      color: #FFFFFF;
+      box-shadow: 0 4px 12px rgba(46, 111, 101, 0.35);
+    }
+
+    .walk-cta-btn {
+      pointer-events: auto;
+      border: 2px solid #1E293B;
+      background: #FFFFFF;
+      color: #0F172A;
+      font-size: 12px;
+      font-weight: 800;
+      padding: 8px 18px;
+      border-radius: 999px;
+      cursor: pointer;
+      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.14);
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .walk-cta-btn.active {
+      background: #0F172A;
+      color: #FFFFFF;
+      border-color: #8C4E33;
+      box-shadow: 0 8px 24px rgba(140, 78, 51, 0.45);
+    }
+
+    /* CONTROLS PANEL (RIGHT) */
+    .controls-card {
+      pointer-events: auto;
+      background: var(--card-bg);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1.5px solid var(--border-soft);
+      border-radius: 16px;
+      padding: 11px 13px;
+      box-shadow: 0 10px 28px rgba(15, 23, 42, 0.10);
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      min-width: 295px;
+    }
+
+    .controls-label {
+      font-size: 9.5px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--ink-muted);
+    }
+
+    .btn-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 5px;
+    }
+
+    .cam-btn {
+      appearance: none;
+      border: 1.2px solid #D5CBB8;
+      background: #FFFFFF;
+      color: var(--ink-dark);
+      font-size: 10.8px;
+      font-weight: 700;
+      padding: 6px 8px;
+      border-radius: 9px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .cam-btn:hover {
+      border-color: var(--accent-terracotta);
+      background: #FDFBF7;
+    }
+
+    .cam-btn.active {
+      background: var(--ink-dark);
+      color: #FFFFFF;
+      border-color: var(--ink-dark);
+    }
+
+    .slider-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 7px;
+      padding-top: 4px;
+      border-top: 1px solid #E6DEC8;
+      font-size: 10.8px;
+      font-weight: 700;
+      color: var(--ink-dark);
+    }
+
+    .slider-row input[type="range"] {
+      flex: 1;
+      accent-color: var(--accent-terracotta);
+      cursor: pointer;
+    }
+
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      padding-top: 4px;
+      border-top: 1px solid #E6DEC8;
+      flex-wrap: wrap;
+    }
+
+    .toggle-chip {
+      font-size: 10.2px;
+      font-weight: 700;
+      color: var(--ink-dark);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+    }
+
+    .toggle-chip input {
+      accent-color: var(--accent-terracotta);
+      cursor: pointer;
+    }
+
+    .export-btn {
+      appearance: none;
+      border: 1.2px solid var(--accent-terracotta);
+      background: #FFFDF9;
+      color: var(--accent-terracotta);
+      font-size: 10.5px;
+      font-weight: 800;
+      padding: 5px 8px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .export-btn:hover {
+      background: var(--accent-terracotta);
+      color: #FFFFFF;
+    }
+
+    /* IMMERSIVE WALK D-PAD HUD (BOTTOM CENTER) */
+    .walk-hud {
+      position: absolute;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 15;
+      background: rgba(15, 23, 42, 0.90);
+      backdrop-filter: blur(12px);
+      color: #FFFFFF;
+      border: 1.5px solid rgba(255, 255, 255, 0.22);
+      border-radius: 18px;
+      padding: 10px 16px;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.28);
+      pointer-events: auto;
+    }
+
+    .walk-hud.visible {
+      display: flex;
+    }
+
+    .walk-hud-title {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      color: #FDE68A;
+      text-transform: uppercase;
+    }
+
+    .walk-controls-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .dpad-btn {
+      border: 1px solid rgba(255,255,255,0.3);
+      background: rgba(255,255,255,0.12);
+      color: #FFFFFF;
+      font-size: 12px;
+      font-weight: 800;
+      padding: 7px 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .dpad-btn:hover, .dpad-btn:active {
+      background: #8C4E33;
+      border-color: #FDE68A;
+    }
+
+    /* BOTTOM BAR : PHOTO REFERENCE + LEGEND */
+    .bottom-bar {
+      position: absolute;
+      bottom: 14px;
+      left: 14px;
+      right: 14px;
+      z-index: 10;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      pointer-events: none;
+      gap: 12px;
+    }
+
+    .photo-ref-card {
+      pointer-events: auto;
+      background: var(--card-bg);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1.5px solid var(--border-soft);
+      border-radius: 16px;
+      padding: 9px;
+      box-shadow: 0 10px 28px rgba(15, 23, 42, 0.12);
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      max-width: 500px;
+    }
+
+    .photo-ref-card img {
+      width: 130px;
+      height: 88px;
+      object-fit: cover;
+      border-radius: 10px;
+      border: 1.5px solid var(--ink-dark);
+      flex-shrink: 0;
+    }
+
+    .photo-ref-info {
+      font-size: 10.8px;
+      line-height: 1.32;
+    }
+
+    .photo-ref-info strong {
+      display: block;
+      color: var(--ink-dark);
+      font-size: 11.8px;
+      margin-bottom: 2px;
+    }
+
+    .photo-thumbs {
+      display: flex;
+      gap: 4px;
+      margin-top: 5px;
+      flex-wrap: wrap;
+    }
+
+    .thumb-pill {
+      font-size: 9.2px;
+      font-weight: 700;
+      padding: 3px 6px;
+      border-radius: 6px;
+      border: 1px solid #CBD5E1;
+      background: #FFFFFF;
+      color: var(--ink-muted);
+      cursor: pointer;
+    }
+
+    .thumb-pill.active {
+      background: var(--accent-terracotta);
+      color: #FFFFFF;
+      border-color: var(--accent-terracotta);
+    }
+
+    .help-pill {
+      pointer-events: auto;
+      background: var(--card-bg);
+      backdrop-filter: blur(12px);
+      border: 1.5px solid var(--border-soft);
+      border-radius: 999px;
+      padding: 8px 14px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--ink-muted);
+      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+    }
+
+    /* 3D ROOM LABELS */
+    .room-label {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      background: rgba(255, 255, 255, 0.94);
+      border: 1.5px solid #1E293B;
+      border-radius: 999px;
+      padding: 4px 11px;
+      font-size: 11px;
+      font-weight: 800;
+      color: #0F172A;
+      pointer-events: none;
+      white-space: nowrap;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.12);
+      transition: opacity 0.2s ease;
+    }
+
+    .room-label span.sub {
+      font-weight: 700;
+      color: #8C4E33;
+      margin-left: 4px;
+    }
+
+    .room-label.tech-badge {
+      background: #FFF7ED;
+      border-color: #8C4E33;
+      color: #9A3412;
+      font-size: 10px;
+    }
+
+
+    /* ORIGINAL REAL PHOTO OVERLAY MODE (IMAGE D'ORIGINE PLEIN ÉCRAN / SPLIT) */
+    .real-photo-overlay {
+      position: absolute;
+      inset: 92px 325px 115px 16px;
+      z-index: 12;
+      background: rgba(15, 23, 42, 0.94);
+      border: 2.5px solid #8C4E33;
+      border-radius: 20px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+      pointer-events: auto;
+    }
+    .real-photo-overlay.visible {
+      display: flex;
+    }
+    .real-photo-header {
+      background: #FAF7F2;
+      padding: 10px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1.5px solid #DCD3C2;
+    }
+    .real-photo-header strong {
+      font-size: 13px;
+      color: #0F172A;
+    }
+    .real-photo-body {
+      flex: 1;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #0F172A;
+      overflow: hidden;
+    }
+    .real-photo-body img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+    .real-photo-nav {
+      background: rgba(250, 247, 242, 0.96);
+      padding: 8px 12px;
+      display: flex;
+      gap: 6px;
+      justify-content: center;
+      flex-wrap: wrap;
+      border-top: 1px solid #DCD3C2;
+    }
+
+    @media (max-width: 900px) {
+      .photo-ref-card { display: none; }
+      .brand-card { max-width: 100%; }
+    }
+
+    /* ============================================================================
+       STAGE DE VISITE IMMERSIVE PHOTORÉALISTE 100% IDENTIQUE AU VRAI (MATTERPORT HD)
+       ============================================================================ */
+    .photoreal-stage {
+      position: absolute;
+      inset: 0;
+      z-index: 8;
+      background: #0B1120;
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+      user-select: none;
+    }
+    .photoreal-stage.visible {
+      display: flex;
+    }
+    .photoreal-viewport {
+      position: relative;
+      flex: 1;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      cursor: grab;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at center, #1E293B 0%, #090D16 100%);
+    }
+    .photoreal-viewport:active {
+      cursor: grabbing;
+    }
+    .photoreal-pan-container {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.22s ease;
+      transform-origin: center center;
+    }
+    .photoreal-pan-container.stepping {
+      transform: scale(1.18) !important;
+      opacity: 0.45;
+    }
+    .photoreal-single-wrap {
+      position: relative;
+      max-width: 96vw;
+      max-height: 82vh;
+      margin-top: 42px;
+      margin-bottom: 58px;
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.65);
+      border: 2.5px solid rgba(250, 247, 242, 0.35);
+      background: #0F172A;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .photoreal-single-wrap img.main-scene-img {
+      display: block;
+      max-width: 95vw;
+      max-height: 78vh;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      pointer-events: none;
+    }
+    /* Split Side-by-Side Comparison */
+    .photoreal-split-wrap {
+      display: none;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      width: 95vw;
+      max-height: 78vh;
+      margin-top: 42px;
+      margin-bottom: 58px;
+      padding: 12px;
+      background: rgba(15, 23, 42, 0.88);
+      border: 2px solid #8C4E33;
+      border-radius: 18px;
+    }
+    .photoreal-split-wrap.active {
+      display: grid;
+    }
+    .photoreal-split-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: #090D16;
+      border-radius: 12px;
+      padding: 8px;
+      border: 1px solid rgba(255,255,255,0.15);
+      overflow: hidden;
+    }
+    .photoreal-split-col span.split-badge {
+      font-size: 12px;
+      font-weight: 800;
+      padding: 4px 12px;
+      border-radius: 999px;
+      margin-bottom: 6px;
+      color: #FFF;
+    }
+    .photoreal-split-col img {
+      width: 100%;
+      max-height: 68vh;
+      object-fit: contain;
+      border-radius: 8px;
+    }
+
+    /* Hotspots Matterport cliquables directement sur l'image */
+    .scene-hotspot {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      z-index: 12;
+      background: rgba(15, 23, 42, 0.88);
+      color: #FFFFFF;
+      border: 2.5px solid #FDE68A;
+      border-radius: 999px;
+      padding: 8px 15px;
+      font-size: 12.5px;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55), 0 0 0 4px rgba(253, 230, 138, 0.24);
+      transition: all 0.18s ease;
+      white-space: nowrap;
+      pointer-events: auto;
+      animation: pulseHotspot 2.2s infinite ease-in-out;
+    }
+    .scene-hotspot:hover {
+      background: #15803D;
+      border-color: #FFFFFF;
+      transform: translate(-50%, -50%) scale(1.10);
+      box-shadow: 0 12px 30px rgba(21, 128, 61, 0.65), 0 0 0 6px rgba(255, 255, 255, 0.32);
+    }
+    .scene-hotspot .hs-ring {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #22C55E;
+      border: 2px solid #FFFFFF;
+      flex-shrink: 0;
+    }
+    @keyframes pulseHotspot {
+      0%, 100% { box-shadow: 0 8px 24px rgba(0,0,0,0.55), 0 0 0 4px rgba(253, 230, 138, 0.22); }
+      50% { box-shadow: 0 8px 28px rgba(0,0,0,0.65), 0 0 0 9px rgba(34, 197, 94, 0.34); }
+    }
+
+    /* Barre de sous-mode visuel (3D Photoréaliste / Vraie Photo / Côte à Côte / 3D WebGL) */
+    .visual-engine-bar {
+      position: absolute;
+      top: 108px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 16;
+      background: rgba(15, 23, 42, 0.92);
+      backdrop-filter: blur(12px);
+      border: 1.5px solid rgba(253, 230, 138, 0.45);
+      border-radius: 999px;
+      padding: 5px 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.40);
+      pointer-events: auto;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .v-engine-btn {
+      border: none;
+      background: transparent;
+      color: #CBD5E1;
+      font-size: 11.5px;
+      font-weight: 800;
+      padding: 6px 13px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: all 0.18s;
+    }
+    .v-engine-btn:hover {
+      color: #FFFFFF;
+      background: rgba(255,255,255,0.10);
+    }
+    .v-engine-btn.active {
+      background: #15803D;
+      color: #FFFFFF;
+      box-shadow: 0 3px 10px rgba(21, 128, 61, 0.45);
+    }
+
+    /* Bandeau d'information de la pièce active en haut de l'image */
+    .station-banner {
+      position: absolute;
+      top: 152px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 14;
+      background: rgba(250, 247, 242, 0.95);
+      color: #0F172A;
+      border: 2px solid #8C4E33;
+      border-radius: 14px;
+      padding: 7px 16px;
+      text-align: center;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.32);
+      pointer-events: none;
+      max-width: 760px;
+    }
+    .station-banner strong {
+      font-size: 13.5px;
+      color: #0F172A;
+      display: block;
+    }
+    .station-banner span {
+      font-size: 11px;
+      color: #475569;
+    }
+
+    /* Mini-Radar Maquette 3D Interactive en bas à droite */
+    .mini-radar-card {
+      position: absolute;
+      bottom: 18px;
+      right: 16px;
+      z-index: 16;
+      width: 265px;
+      background: rgba(15, 23, 42, 0.94);
+      border: 2px solid #8C4E33;
+      border-radius: 16px;
+      padding: 8px;
+      box-shadow: 0 12px 32px rgba(0,0,0,0.45);
+      pointer-events: auto;
+    }
+    .mini-radar-title {
+      font-size: 10px;
+      font-weight: 800;
+      color: #FDE68A;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 5px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .mini-radar-map {
+      position: relative;
+      width: 100%;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+    .mini-radar-map img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+    .radar-pin {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: rgba(15, 23, 42, 0.88);
+      color: #FFFFFF;
+      border: 1.8px solid #FFFFFF;
+      font-size: 10px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.15s;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+    }
+    .radar-pin:hover, .radar-pin.active {
+      background: #22C55E;
+      border-color: #FDE68A;
+      transform: translate(-50%, -50%) scale(1.28);
+      z-index: 5;
+    }
+
+
+    /* ============================================================================
+       ZERO-OVERLAP CLEAN IMMERSIVE LAYOUT (v38)
+       When #photoreal-stage.visible is active, hide WebGL sidebars so 100% of the
+       photorealistic view & mini-radar are completely unobstructed!
+       ============================================================================ */
+    body.photoreal-active .controls-card,
+    body.photoreal-active .photo-ref-card,
+    body.photoreal-active .help-pill,
+    body.photoreal-active .mode-switcher-card,
+    body.photoreal-active #btn-real-photo-mode {
+      display: none !important;
+    }
+    body.photoreal-active .top-bar {
+      top: 8px;
+      left: 12px;
+      right: 12px;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: nowrap;
+    }
+    .visual-engine-bar {
+      z-index: 25 !important;
+      top: 10px !important;
+      left: auto !important;
+      right: 14px !important;
+      transform: none !important;
+      padding: 5px 8px !important;
+    }
+    body.photoreal-active .brand-card {
+      padding: 6px 12px;
+      max-width: none;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      height: 44px;
+    }
+    body.photoreal-active .brand-eyebrow {
+      display: none;
+    }
+    body.photoreal-active .brand-title {
+      font-size: 13px;
+      white-space: nowrap;
+    }
+    body.photoreal-active .brand-sub {
+      display: none;
+    }
+    body.photoreal-active .center-top-col {
+      display: none !important;
+    }
+    body.photoreal-active .station-banner {
+      top: 64px;
+      left: 16px;
+      right: 296px;
+      transform: none;
+      max-width: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 6px 16px;
+      text-align: left;
+    }
+    body.photoreal-active .photoreal-viewport {
+      padding: 112px 296px 96px 16px;
+    }
+    body.photoreal-active .photoreal-single-wrap {
+      max-width: calc(100vw - 320px);
+      max-height: calc(100vh - 215px);
+      margin: 0;
+    }
+    body.photoreal-active .photoreal-single-wrap img.main-scene-img {
+      max-width: calc(100vw - 326px);
+      max-height: calc(100vh - 220px);
+    }
+    body.photoreal-active .photoreal-split-wrap {
+      width: calc(100vw - 320px);
+      max-height: calc(100vh - 215px);
+      margin: 0;
+    }
+    body.photoreal-active .mini-radar-card {
+      top: 66px;
+      bottom: 96px;
+      right: 14px;
+      width: 272px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    body.photoreal-active .walk-hud {
+      bottom: 10px;
+      left: 14px;
+      right: 14px;
+      transform: none;
+      flex-direction: row;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      padding: 8px 14px;
+    }
+    body.photoreal-active .walk-hud-title {
+      display: none;
+    }
+    body.photoreal-active #webgl-dpad-row {
+      display: none !important;
+    }
+    .scene-hotspot.compact-pin {
+      padding: 5px 11px;
+      font-size: 11.5px;
+    }
+
+
+    /* ÉPURATION MINIMALISTE (v40) : Zéro bandeau explicatif bavard + Fond Parchemin #FAF7F2 */
+    body.photoreal-active .station-banner {
+      display: none !important;
+    }
+    body.photoreal-active .photoreal-stage {
+      background: #FAF7F2 !important;
+    }
+    body.photoreal-active .photoreal-viewport {
+      background: #FAF7F2 !important;
+      padding: 68px 296px 86px 16px !important;
+    }
+    body.photoreal-active .photoreal-single-wrap {
+      background: #FFFFFF !important;
+      border: 1px solid #EAE4D9 !important;
+      box-shadow: 0 12px 32px rgba(30, 41, 59, 0.05) !important;
+      max-height: calc(100vh - 165px) !important;
+    }
+    body.photoreal-active .photoreal-single-wrap img.main-scene-img {
+      max-height: calc(100vh - 170px) !important;
+    }
+    body.photoreal-active .mini-radar-card {
+      background: #FFFFFF !important;
+      border: 1px solid #EAE4D9 !important;
+      box-shadow: 0 12px 32px rgba(30, 41, 59, 0.05) !important;
+    }
+    body.photoreal-active .mini-radar-title {
+      color: #8C4E33 !important;
+    }
+    body.photoreal-active .walk-hud {
+      background: #FFFFFF !important;
+      border: 1px solid #EAE4D9 !important;
+      box-shadow: 0 8px 24px rgba(30, 41, 59, 0.06) !important;
+    }
+
+
+    /* ÉPURATION MINIMALISTE (v40) : Zéro bandeau explicatif bavard + Fond Parchemin #FAF7F2 */
+    body.photoreal-active .station-banner {
+      display: none !important;
+    }
+    body.photoreal-active .photoreal-stage {
+      background: #FAF7F2 !important;
+    }
+    body.photoreal-active .photoreal-viewport {
+      background: #FAF7F2 !important;
+      padding: 68px 296px 86px 16px !important;
+    }
+    body.photoreal-active .photoreal-single-wrap {
+      background: #FFFFFF !important;
+      border: 1px solid #EAE4D9 !important;
+      box-shadow: 0 12px 32px rgba(30, 41, 59, 0.05) !important;
+      max-height: calc(100vh - 165px) !important;
+    }
+    body.photoreal-active .photoreal-single-wrap img.main-scene-img {
+      max-height: calc(100vh - 170px) !important;
+    }
+    body.photoreal-active .mini-radar-card {
+      background: #FFFFFF !important;
+      border: 1px solid #EAE4D9 !important;
+      box-shadow: 0 12px 32px rgba(30, 41, 59, 0.05) !important;
+    }
+    body.photoreal-active .mini-radar-title {
+      color: #8C4E33 !important;
+    }
+    body.photoreal-active .walk-hud {
+      background: #FFFFFF !important;
+      border: 1px solid #EAE4D9 !important;
+      box-shadow: 0 8px 24px rgba(30, 41, 59, 0.06) !important;
+    }
+
+  </style>
+
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body class="photoreal-active">
+
+  <div id="canvas-container"></div>
+  <div id="labels-container"></div>
+
+  <!-- BARRE DE MODE VISUEL PERMANENTE (ACCESSIBLE EN PHOTORÉALISTE ET EN WEBGL) -->
+  <div class="visual-engine-bar" id="visual-engine-bar">
+    <a href="studio-deco.html" class="v-engine-btn" style="background:#8C4E33; color:#FFFFFF; text-decoration:none;">
+      ✨ Atelier Déco &amp; Travaux
+    </a>
+    <button class="v-engine-btn active" id="vbtn-render3d" onclick="window.setVisualSubMode('render3d')">
+      🎨 Visuel 3D Photoréaliste (Identique au Vrai)
+    </button>
+    <button class="v-engine-btn" id="vbtn-realphoto" onclick="window.setVisualSubMode('realphoto')">
+      📸 Vraie Photo Originale
+    </button>
+    <button class="v-engine-btn" id="vbtn-split" onclick="window.setVisualSubMode('split')">
+      ⚖️ Côte à Côte (Vraie Photo ↔ 3D)
+    </button>
+    <button class="v-engine-btn" id="vbtn-webgl" onclick="window.setVisualSubMode('webgl')">
+      🧊 Maquette 3D WebGL (360° Libre)
+    </button>
+  </div>
+
+  <!-- STAGE DE VISITE IMMERSIVE PHOTORÉALISTE 100% IDENTIQUE AU VRAI -->
+  <div class="photoreal-stage visible" id="photoreal-stage">
+
+    <div class="station-banner" id="station-banner">
+      <strong id="st-banner-title">③ Grand Salon Vue Mer (18,0 m²) — Tapis Vagues, Banquette Est &amp; Cheminée Ouest</strong>
+      <span id="st-banner-desc">Clique sur les pastilles dorées sur l'image pour marcher d'une pièce à l'autre, ou glisse à la souris pour explorer !</span>
+    </div>
+
+    <div class="photoreal-viewport" id="photoreal-viewport">
+      <div class="photoreal-pan-container" id="photoreal-pan-container">
+        <!-- Vue Unique (3D Photoréaliste ou Vraie Photo) avec Hotspots Matterport cliquables -->
+        <div class="photoreal-single-wrap" id="photoreal-single-wrap">
+          <img class="main-scene-img" id="photoreal-main-img" src="renders_3d/villers_3d_03_salon_corrige.jpg" alt="Visite Immersive Villers 3D" />
+          <div id="photoreal-hotspots-layer"></div>
+        </div>
+
+        <!-- Vue Côte à Côte (Vraie Photo à gauche + Rendu 3D Photoréaliste à droite) -->
+        <div class="photoreal-split-wrap" id="photoreal-split-wrap">
+          <div class="photoreal-split-col">
+            <span class="split-badge" style="background:#334155;">📸 VRAIE PHOTO ORIGINALE DE L'APPARTEMENT</span>
+            <img id="photoreal-split-orig" src="textures/room_salon_nord.jpg" alt="Vraie Photo Originale" />
+          </div>
+          <div class="photoreal-split-col">
+            <span class="split-badge" style="background:#15803D;">🎨 VISUEL 3D PHOTORÉALISTE VALIDÉ</span>
+            <img id="photoreal-split-3d" src="renders_3d/villers_3d_03_salon_corrige.jpg" alt="Visuel 3D Photoréaliste" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mini-Radar Maquette 3D Interactive à droite -->
+    <div class="mini-radar-card" id="mini-radar-card">
+      <div>
+        <div class="mini-radar-title">
+          <span>🧭 1. Plan 3D Appartement (Clique ①-⑦)</span>
+          <span id="radar-active-label" style="color:#4ADE80;">③ Salon</span>
+        </div>
+        <div class="mini-radar-map">
+          <img src="renders_3d/villers_3d_00_maquette_globale_v11_parfaite.jpg" alt="Mini Maquette 3D v11" />
+          <button class="radar-pin" data-st="0" style="left:72%; top:64%;" title="① Entrée Fleurie" onclick="window.walkToStation(0)">①</button>
+          <button class="radar-pin" data-st="1" style="left:67%; top:33%;" title="② Cuisine Vue Mer" onclick="window.walkToStation(1)">②</button>
+          <button class="radar-pin active" data-st="2" style="left:44%; top:35%;" title="③ Grand Salon Vue Mer" onclick="window.walkToStation(2)">③</button>
+          <button class="radar-pin" data-st="4" style="left:46%; top:65%;" title="④ Chambre Vert Canard" onclick="window.walkToStation(4)">④</button>
+          <button class="radar-pin" data-st="5" style="left:23%; top:55%;" title="⑤ Salle de Bain" onclick="window.walkToStation(5)">⑤</button>
+          <button class="radar-pin" data-st="6" style="left:22%; top:72%;" title="⑥ Petit Couloir & WC" onclick="window.walkToStation(6)">⑥</button>
+          <button class="radar-pin" data-st="7" style="left:45%; top:88%;" title="⑦ Loggia Couverte Sud" onclick="window.walkToStation(7)">⑦</button>
+        </div>
+      </div>
+
+      <div>
+        <div class="mini-radar-title">
+          <span>🏖️🏡 2. Site Complet : Plage, Immeuble &amp; Jardin</span>
+        </div>
+        <div class="mini-radar-map" style="cursor:pointer;" onclick="window.walkToStation(10)">
+          <img src="renders_3d/villers_3d_08_interieur_exterieur_plage_immeuble_jardin.jpg" alt="Maquette Globale Intérieur Extérieur" />
+          <button class="radar-pin" data-st="9" style="left:50%; top:12%; background:#0369A1; width:auto; padding:0 6px; border-radius:999px;" onclick="event.stopPropagation(); window.walkToStation(9)">⑨ Plage</button>
+          <button class="radar-pin" data-st="10" style="left:50%; top:43%; background:#8C4E33; width:auto; padding:0 6px; border-radius:999px;" onclick="event.stopPropagation(); window.walkToStation(10)">0. Tout</button>
+          <button class="radar-pin" data-st="8" style="left:50%; top:78%; background:#0F766E; width:auto; padding:0 6px; border-radius:999px;" onclick="event.stopPropagation(); window.walkToStation(8)">⑧ Jardin</button>
+        </div>
+      </div>
+
+      <div style="font-size:10.5px; color:#CBD5E1; line-height:1.35; text-align:center; background:rgba(255,255,255,0.06); padding:6px 8px; border-radius:8px;">
+        🖱️ <strong>Glisser sur l'image :</strong> Regarder autour<br/>
+        🔍 <strong>Molette :</strong> Zoomer • <strong>Flèches ← → :</strong> Avancer
+      </div>
+    </div>
+  </div>
+
+  <!-- TOP UI -->
+  <div class="top-bar">
+    <div class="brand-card">
+      <div class="brand-eyebrow">🌊 JUMEAU ARCHITECTURAL 3D • CÔTE FLEURIE</div>
+      <div class="brand-title">Villa « La Huchette » — Appartement Lot n° 4 (1er Étage Ouest)</div>
+      <div class="brand-sub">
+        28 av. de la République, 14640 Villers-sur-Mer • <strong>48 à 49 m² au sol + Loggia Sud 12 m² (~60 m² utiles)</strong><br/>
+        Lot n° 4 (190/1000e • IFNOR 1477 GUILLAU6) • Fenêtre Cuisine Lepeltier : <strong>1,795 m × 1,665 m</strong>
+      </div>
+      <div style="display:flex;gap:5px;margin-top:4px;flex-wrap:nowrap;white-space:nowrap;">
+        <a href="catalogue/entree.html" style="padding:3px 9px;border-radius:6px;font-size:11px;font-weight:600;text-decoration:none;background:#F8F5EE;color:#0F172A;border:1px solid #D8CBB8;">📐 1. Plan &amp; Pièces (1-7)</a>
+        <a href="catalogue/index.html" style="padding:3px 9px;border-radius:6px;font-size:11px;font-weight:600;text-decoration:none;background:#F8F5EE;color:#0F172A;border:1px solid #D8CBB8;">📸 2. Photos (87)</a>
+        <a href="catalogue/plan-maitre.html" style="text-decoration:none;background:#FAF7F2;color:#0F172A;border:1px solid #DCD3C2;padding:5px 10px;border-radius:6px;font-size:11px;font-weight:700;">🖼️ 5. Plan Maître HD</a>
+          <a href="catalogue/videos.html" style="padding:3px 9px;border-radius:6px;font-size:11px;font-weight:600;text-decoration:none;background:#F8F5EE;color:#0F172A;border:1px solid #D8CBB8;">🎬 3. Vidéos (64)</a>
+      </div>
+    </div>
+
+    <!-- CENTER: STATE SWITCHER + WALK IMMERSIVE BUTTON -->
+    <div class="center-top-col">
+      <div class="mode-switcher-card">
+        <button id="btn-mode-actuel" class="mode-btn active-actuel" onclick="window.setRenovationMode(false)">
+          🕰️ État Actuel (« Dans son jus 1970 / 2021 »)
+        </button>
+        <button id="btn-mode-renove" class="mode-btn" onclick="window.setRenovationMode(true)">
+          ✨ Projet Rénové (« Contemporain Côte Fleurie »)
+        </button>
+      </div>
+
+      <div style="display:flex; gap:8px; pointer-events:auto; flex-wrap:wrap; justify-content:center;">
+        <button id="btn-walk-mode" class="walk-cta-btn" style="background:#15803D; color:#FFFFFF; border-color:#15803D;" onclick="window.toggleWalkMode()">
+          🚶 Marche Immersive 3D (À 1,70 m • Clique au sol ou ↑↓←→)
+        </button>
+        <button id="btn-autowalk-mode" class="walk-cta-btn" style="background:#B45309; color:#FFFFFF; border-color:#B45309;" onclick="window.toggleAutoWalkTour()">
+          ▶️ Visite Marche Automatique (Pièce par Pièce + Jardin &amp; Plage)
+        </button>
+        <button id="btn-real-photo-mode" class="walk-cta-btn" style="border-color:#8C4E33; color:#8C4E33;" onclick="window.toggleRealPhotoOverlay()">
+          📐 Planches &amp; Photos Pièces ① à ⑧
+        </button>
+      </div>
+    </div>
+
+    <div class="controls-card">
+      <div class="controls-label">Visite Guidée 3D Interactive (Intérieur + Immeuble, Plage &amp; Jardin)</div>
+      <div class="btn-grid">
+        <button class="cam-btn active" data-cam="site_complet">🏖️🏡 0. Immeuble, Plage &amp; Jardin</button>
+        <button class="cam-btn" data-cam="dollhouse">🏠 Appartement 1er Étage 3D</button>
+        <button class="cam-btn" data-cam="rue_cour_mer">🌊 ⑧ Plage, Cabines &amp; Façade Mer</button>
+        <button class="cam-btn" data-cam="loggia_jardin">🌳 ⑦ Loggia &amp; Jardin 526 m²</button>
+        <button class="cam-btn" data-cam="couloir_entree">🌸 ① Entrée Fleurie (~6,5m²)</button>
+        <button class="cam-btn" data-cam="cuisine_mer">🍳 ② Cuisine Mer (~7,5m²)</button>
+        <button class="cam-btn" data-cam="sejour_mer">🌊 ③ Salon Vue Mer (~16,5m²)</button>
+        <button class="cam-btn" data-cam="piece_verte">🛏️ ④ Chambre Verte (~13,5m²)</button>
+        <button class="cam-btn" data-cam="sdb_wc">🚿 ⑤ SDB &amp; ⑥ WC (5m²)</button>
+        <button class="cam-btn" data-cam="top_plan">📐 Plan 3D Vue Dessus (75°)</button>
+      </div>
+
+      <div class="slider-row">
+        <span>📐 Ampleur / Échelle :</span>
+        <input type="range" id="scale-slider" min="100" max="150" value="122" />
+        <span id="scale-label" style="min-width:45px; text-align:right; color:#2E6F65;">122 %</span>
+      </div>
+
+      <div class="slider-row">
+        <span>☀️ Lumière :</span>
+        <input type="range" id="sun-slider" min="0" max="100" value="38" />
+        <span id="sun-label" style="min-width:72px; text-align:right; color:#8C4E33;">Midi Solaire</span>
+      </div>
+
+      <div class="toggle-row">
+        <label class="toggle-chip" title="Masque uniquement les murs devant la caméra en vue extérieure">
+          <input type="checkbox" id="toggle-cutaway" checked /> Murs sans tain
+        </label>
+        <label class="toggle-chip">
+          <input type="checkbox" id="toggle-roof" /> 2e Étage &amp; Tourelle
+        </label>
+        <label class="toggle-chip">
+          <input type="checkbox" id="toggle-lines" /> Contours BD (Off)
+        </label>
+        <label class="toggle-chip">
+          <input type="checkbox" id="toggle-labels" checked /> Surfaces (m²)
+        </label>
+      </div>
+
+      <div class="toggle-row">
+        <button class="cam-btn" id="btn-top-plan" onclick="window.setCameraPreset('top_plan')" style="flex:1; justify-content:center;">📐 Plan Dessus</button>
+        <button class="cam-btn" id="btn-spin" style="flex:1; justify-content:center;">🔄 360°</button>
+        <button class="export-btn" id="btn-screenshot">📸 PNG</button>
+        <button class="export-btn" id="btn-export-obj">📦 .OBJ</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- REAL PHOTO OVERLAY (PLANCHES DÉTAILLÉES PIÈCE PAR PIÈCE ① À ⑧) -->
+  <div class="real-photo-overlay" id="real-photo-overlay">
+    <div class="real-photo-header">
+      <div>
+        <strong id="overlay-photo-title">📐 Planche Détaillée ③ — Salon Vue Mer (~16,5 m²)</strong>
+        <div id="overlay-photo-desc" style="font-size:11px; color:#475569; margin-top:2px;">Tapis Vagues orienté Nord-Sud (bleu marine foncé côté table/mer -> crème côté Sud), banquette à droite (Est), cheminée &amp; 2 niches bois à gauche (Ouest).</div>
+      </div>
+      <button class="dpad-btn" style="background:#8C4E33; color:#FFF; border:none; padding:6px 12px; cursor:pointer;" onclick="window.toggleRealPhotoOverlay()">✕ Retour Vue 3D</button>
+    </div>
+    <div class="real-photo-body">
+      <img id="overlay-photo-img" src="renders_3d/villers_3d_03_salon_corrige.jpg" alt="Vue 3D Photoréaliste Villers" />
+    </div>
+    <div class="real-photo-nav">
+      <button class="thumb-pill active" onclick="window.selectRefPhoto(0)">③ Salon (~18m²)</button>
+      <button class="thumb-pill" onclick="window.selectRefPhoto(1)">① Entrée (~4,8m²)</button>
+      <button class="thumb-pill" onclick="window.selectRefPhoto(2)">② Cuisine (~8,2m²)</button>
+      <button class="thumb-pill" onclick="window.selectRefPhoto(3)">④ Chambre (~14,3m²)</button>
+      <button class="thumb-pill" onclick="window.selectRefPhoto(4)">⑤ SDB (~3,8m²)</button>
+      <button class="thumb-pill" onclick="window.selectRefPhoto(5)">⑥ WC (~1,4m²)</button>
+      <button class="thumb-pill" onclick="window.selectRefPhoto(6)">⑦ Loggia (9,2m²)</button>
+      <button class="thumb-pill" onclick="window.selectRefPhoto(7)">⑧ Immeuble, Plage &amp; Jardin</button>
+    </div>
+  </div>
+
+  <!-- IMMERSIVE WALK MODE HUD (BOTTOM CENTER) -->
+  <div class="walk-hud" id="walk-hud">
+    <div class="walk-hud-title">🚶 Marche Immersive à 1,70 m (Style Matterport / Street View) — Clique sur un cercle blanc au sol, utilise ↑ ↓ ← →, ou clique sur une étape :</div>
+    <div class="walk-controls-row" style="flex-wrap:wrap; justify-content:center; gap:5px; width:100%;">
+      <button class="dpad-btn" style="background:#8C4E33;" onclick="window.walkToStation(10)">🏖️🏡 0. Immeuble, Plage &amp; Jardin</button>
+      <button class="dpad-btn" style="background:#15803D;" onclick="window.walkToStation(0)">🌸 ① Entrée</button>
+      <button class="dpad-btn" style="background:#15803D;" onclick="window.walkToStation(1)">🍳 ② Cuisine</button>
+      <button class="dpad-btn" style="background:#15803D;" onclick="window.walkToStation(2)">🌊 ③ Salon Mer</button>
+      <button class="dpad-btn" style="background:#15803D;" onclick="window.walkToStation(3)">🔥 ③ Salon Sud</button>
+      <button class="dpad-btn" style="background:#15803D;" onclick="window.walkToStation(4)">🛏️ ④ Chambre</button>
+      <button class="dpad-btn" style="background:#15803D;" onclick="window.walkToStation(5)">🚿 ⑤ SDB</button>
+      <button class="dpad-btn" style="background:#15803D;" onclick="window.walkToStation(6)">🚽 ⑥ WC</button>
+      <button class="dpad-btn" style="background:#15803D;" onclick="window.walkToStation(7)">☀️ ⑦ Loggia</button>
+      <button class="dpad-btn" style="background:#0F766E;" onclick="window.walkToStation(8)">🌳 ⑧ Jardin 526m²</button>
+      <button class="dpad-btn" style="background:#0369A1;" onclick="window.walkToStation(9)">🏖️ ⑨ Plage &amp; Mer</button>
+      
+    </div>
+    <div class="walk-controls-row" id="webgl-dpad-row">
+      <button class="dpad-btn" onmousedown="window.startWalkStep('turnL')" onmouseup="window.stopWalkStep()" ontouchstart="window.startWalkStep('turnL')" ontouchend="window.stopWalkStep()">↶ Tourner G</button>
+      <button class="dpad-btn" onmousedown="window.startWalkStep('fwd')" onmouseup="window.stopWalkStep()" ontouchstart="window.startWalkStep('fwd')" ontouchend="window.stopWalkStep()">▲ Avancer</button>
+      <button class="dpad-btn" onmousedown="window.startWalkStep('back')" onmouseup="window.stopWalkStep()" ontouchstart="window.startWalkStep('back')" ontouchend="window.stopWalkStep()">▼ Reculer</button>
+      <button class="dpad-btn" onmousedown="window.startWalkStep('left')" onmouseup="window.stopWalkStep()" ontouchstart="window.startWalkStep('left')" ontouchend="window.stopWalkStep()">◄ Pas G</button>
+      <button class="dpad-btn" onmousedown="window.startWalkStep('right')" onmouseup="window.stopWalkStep()" ontouchstart="window.startWalkStep('right')" ontouchend="window.stopWalkStep()">► Pas D</button>
+      <button class="dpad-btn" onmousedown="window.startWalkStep('turnR')" onmouseup="window.stopWalkStep()" ontouchstart="window.startWalkStep('turnR')" ontouchend="window.stopWalkStep()">↷ Tourner D</button>
+      <button class="dpad-btn" id="btn-hud-autowalk" style="background:#B45309;" onclick="window.toggleAutoWalkTour()">▶️ Marche Auto</button>
+      <button class="dpad-btn" style="background:#8C4E33;" onclick="window.toggleWalkMode()">✕ Vue Maquette</button>
+    </div>
+  </div>
+
+  <!-- BOTTOM UI -->
+  <div class="bottom-bar">
+    <div class="photo-ref-card" id="photo-card">
+      <img id="ref-img" src="renders_3d/villers_3d_03_salon_corrige.jpg" alt="Vue 3D Photoréaliste Villers" onclick="window.toggleRealPhotoOverlay(true)" style="cursor:pointer;" />
+      <div class="photo-ref-info">
+        <strong id="ref-title">③ Salon Vue Mer (18,0 m²) — Tapis Vagues, Banquette Est &amp; Cheminée Ouest</strong>
+        <span id="ref-desc">Clique sur la vignette pour agrandir la vue 3D photoréaliste HD de la pièce où tu te trouves !</span>
+        <div class="photo-thumbs">
+          <button class="thumb-pill active" onclick="window.selectRefPhoto(0)">③ Salon</button>
+          <button class="thumb-pill" onclick="window.selectRefPhoto(1)">① Entrée</button>
+          <button class="thumb-pill" onclick="window.selectRefPhoto(2)">② Cuisine</button>
+          <button class="thumb-pill" onclick="window.selectRefPhoto(3)">④ Chambre</button>
+          <button class="thumb-pill" onclick="window.selectRefPhoto(4)">⑤ SDB</button>
+          <button class="thumb-pill" onclick="window.selectRefPhoto(5)">⑥ WC</button>
+          <button class="thumb-pill" onclick="window.selectRefPhoto(6)">⑦ Loggia</button>
+          <button class="thumb-pill" onclick="window.selectRefPhoto(7)">⑧ Extérieur</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="help-pill">
+      🖱️ <strong>Souris :</strong> Pivoter 360° • <strong>Cercles au sol / ↑↓←→ :</strong> Marcher dans l'appartement
+    </div>
+  </div>
+
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    import { OBJExporter } from 'three/addons/exporters/OBJExporter.js';
+    import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+
+    const REF_PHOTOS = [
+      {
+        file: "renders_3d/villers_3d_03_salon_corrige.jpg",
+        title: "③ Grand Salon Vue Mer (18,0 m²) — Tapis Vagues, Banquette Est & Cheminée Ouest",
+        desc: "Papier peint ocre à feuilles, cheminée blanche centrée à l'Ouest flanquée des 2 placards bas bois miel, table + 2 bancs sous la baie vue mer, tapis vagues Nord-Sud."
+      },
+      {
+        file: "renders_3d/villers_3d_01_entree_fleurie_seule.jpg",
+        title: "① Entrée Fleurie (4,8 m² — Couloir d'accueil)",
+        desc: "Papier peint fleuri orange 70s, banquette bordeaux à gauche sous étagère murale blanche, pouf violet, commode blanche 3 tiroirs à droite + sac turquoise et ballon."
+      },
+      {
+        file: "renders_3d/villers_3d_02_cuisine_v3_ouverte.jpg",
+        title: "② Cuisine Vue Mer (8,2 m² — Fenêtre Vue Mer au Nord)",
+        desc: "Plan en L carrelé marron + micro-ondes + évier double caramel à droite (Est) ; frigo Indesit + passage ouvert 2↔3 vers le Salon + cuisinière à gauche (Ouest)."
+      },
+      {
+        file: "renders_3d/villers_3d_04_chambre_corrigee.jpg",
+        title: "④ Chambre / 2e Salon Vert Canard (14,3 m² — Tapis persan & Lit double)",
+        desc: "Tapis persan bleu clair à médaillon + table ronde rotin au centre ; commode bois + lit double bleu à droite (Est) ; TV d'angle + rotin + porte couloir SDB/WC à gauche."
+      },
+      {
+        file: "renders_3d/villers_3d_06_salle_de_bain_seule.jpg",
+        title: "⑤ Salle de Bain (3,8 m² — Lave-linge, Cumulus, Lavabo & Douche)",
+        desc: "Cumulus vertical au-dessus du lave-linge à gauche, lavabo sur colonne + miroir au centre, cabine de douche vitrée à droite, fenêtre à voilages vert anis à l'Ouest."
+      },
+      {
+        file: "renders_3d/villers_3d_07_wc_independant_seul.jpg",
+        title: "⑥ Petit Couloir & WC Séparé (1,4 m² — Enfilade Ouest)",
+        desc: "WC indépendant avec petite fenêtre en bas à gauche au bout du dégagement desservant la Salle de Bain ⑤ et la Chambre ④."
+      },
+      {
+        file: "renders_3d/villers_3d_07_loggia_corrigee.jpg",
+        title: "⑦ Loggia Couverte Sud (9,2 m² — Vue sur le Jardin de 526 m²)",
+        desc: "Draisienne verte à gauche sous la verrière, table blanche + 4 chaises au centre, mur Sud droit fermé à colombages avec étendoir et trotteur bébé, armoire blanche à l'Est."
+      },
+      {
+        file: "renders_3d/villers_3d_08_interieur_exterieur_plage_immeuble_jardin.jpg",
+        title: "⑧ Vue 3D Globale : Immeuble « La Huchette », Plage & Cabines au Nord, Jardin & Abords Latéraux au Sud",
+        desc: "Maquette 3D complète Intérieur + Extérieur avec le vrai jardin divisé en 2 par le muret central, le cabanon à toit rouge et les bâtiments latéraux fidèles aux photos."
+      }
+    ];
+
+    window.realPhotoOverlayOpen = false;
+    window.toggleRealPhotoOverlay = function(forceState) {
+      window.realPhotoOverlayOpen = (typeof forceState === 'boolean') ? forceState : !window.realPhotoOverlayOpen;
+      document.getElementById('real-photo-overlay').classList.toggle('visible', window.realPhotoOverlayOpen);
+      document.getElementById('btn-real-photo-mode').classList.toggle('active', window.realPhotoOverlayOpen);
+    };
+
+    window.selectRefPhoto = function(idx) {
+      const p = REF_PHOTOS[idx] || REF_PHOTOS[0];
+      const imgEl = document.getElementById('ref-img');
+      imgEl.src = p.file;
+      document.getElementById('ref-title').textContent = p.title;
+      document.getElementById('ref-desc').textContent = p.desc;
+      const ovImg = document.getElementById('overlay-photo-img');
+      if (ovImg) {
+        ovImg.src = p.file;
+        document.getElementById('overlay-photo-title').textContent = "📐 " + p.title;
+        document.getElementById('overlay-photo-desc').textContent = p.desc;
+      }
+      document.querySelectorAll('.thumb-pill').forEach((el, i) => {
+        el.classList.toggle('active', (i % 8) === idx);
+      });
+    };
+
+    // --- SCENE, CAMERA, RENDERER ---
+    const container = document.getElementById('canvas-container');
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0xE8EEF2);
+    scene.fog = new THREE.FogExp2(0xE8EEF2, 0.009);
+
+    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 220);
+    camera.position.set(-15.5, 16.5, 18.5);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.10;
+    container.appendChild(renderer.domElement);
+
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.06;
+    controls.target.set(0.2, 0.2, -1.0);
+    controls.maxPolarAngle = Math.PI / 2 - 0.01;
+    controls.minDistance = 0.01;
+    controls.maxDistance = 65;
+
+    // --- LIGHTING ---
+    const ambientLight = new THREE.AmbientLight(0xFFFDF8, 0.82);
+    scene.add(ambientLight);
+
+    const hemiLight = new THREE.HemisphereLight(0xE0F2FE, 0xF5E6C4, 0.58);
+    hemiLight.position.set(0, 18, 0);
+    scene.add(hemiLight);
+
+    const sunLight = new THREE.DirectionalLight(0xFFF6E5, 1.55);
+    sunLight.position.set(-6, 15, 11);
+    sunLight.castShadow = true;
+    sunLight.shadow.mapSize.width = 2048;
+    sunLight.shadow.mapSize.height = 2048;
+    const d = 15;
+    sunLight.shadow.camera.left = -d;
+    sunLight.shadow.camera.right = d;
+    sunLight.shadow.camera.top = d;
+    sunLight.shadow.camera.bottom = -d;
+    sunLight.shadow.bias = -0.0005;
+    scene.add(sunLight);
+
+    const seaLight = new THREE.DirectionalLight(0xBAE6FD, 0.65);
+    seaLight.position.set(0, 6, -16);
+    scene.add(seaLight);
+
+    // --- PROCEDURAL TEXTURES ---
+    function createPineFloorTexture(isRenovated) {
+      const canvas = document.createElement('canvas');
+      canvas.width = 512;
+      canvas.height = 512;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = isRenovated ? '#F2E8D5' : '#DDA86B';
+      ctx.fillRect(0, 0, 512, 512);
+      const strips = 10;
+      const stripW = 512 / strips;
+      for (let i = 0; i < strips; i++) {
+        const x = i * stripW;
+        const delta = (i % 3 === 0) ? -8 : (i % 2 === 0 ? 6 : 0);
+        ctx.fillStyle = isRenovated
+          ? `rgb(${240 + delta}, ${229 + delta}, ${209 + delta})`
+          : `rgb(${218 + delta}, ${164 + delta}, ${104 + delta})`;
+        ctx.fillRect(x, 0, stripW, 512);
+        ctx.strokeStyle = isRenovated ? 'rgba(120, 95, 65, 0.22)' : 'rgba(95, 52, 20, 0.35)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(x, 0); ctx.lineTo(x, 512);
+        ctx.stroke();
+        const jointY = ((i * 157) % 420) + 45;
+        ctx.beginPath();
+        ctx.moveTo(x, jointY); ctx.lineTo(x + stripW, jointY);
+        ctx.stroke();
+      }
+      const tex = new THREE.CanvasTexture(canvas);
+      tex.wrapS = THREE.RepeatWrapping;
+      tex.wrapT = THREE.RepeatWrapping;
+      tex.repeat.set(4, 4);
+      return tex;
+    }
+
+    function create70sLeafWallpaperTexture() {
+      const canvas = document.createElement('canvas');
+      canvas.width = 256;
+      canvas.height = 256;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#EFEAD8';
+      ctx.fillRect(0, 0, 256, 256);
+      const colors = ['#3B7A57', '#8C583A', '#6B8E23', '#B8860B'];
+      for (let y = 16; y < 256; y += 32) {
+        for (let x = 16; x < 256; x += 32) {
+          ctx.fillStyle = colors[((x + y) / 32) % colors.length];
+          ctx.beginPath();
+          ctx.ellipse(x, y, 9, 5, Math.PI / 4, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.beginPath();
+          ctx.ellipse(x + 10, y + 10, 7, 4, -Math.PI / 4, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+      const tex = new THREE.CanvasTexture(canvas);
+      tex.wrapS = THREE.RepeatWrapping;
+      tex.wrapT = THREE.RepeatWrapping;
+      tex.repeat.set(5, 2.5);
+      return tex;
+    }
+
+    function create70sFloralWallpaperTexture() {
+      const canvas = document.createElement('canvas');
+      canvas.width = 256;
+      canvas.height = 256;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#F7E7CE';
+      ctx.fillRect(0, 0, 256, 256);
+      const colors = ['#D95F18', '#8C421E', '#E69F00', '#C05621'];
+      for (let y = 24; y < 256; y += 48) {
+        for (let x = 24; x < 256; x += 48) {
+          const c = colors[((x + y) / 48) % colors.length];
+          ctx.fillStyle = c;
+          for (let a = 0; a < 5; a++) {
+            const ang = (a * Math.PI * 2) / 5;
+            ctx.beginPath();
+            ctx.arc(x + Math.cos(ang) * 9, y + Math.sin(ang) * 9, 7, 0, Math.PI * 2);
+            ctx.fill();
+          }
+          ctx.fillStyle = '#F6E05E';
+          ctx.beginPath();
+          ctx.arc(x, y, 5, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+      const tex = new THREE.CanvasTexture(canvas);
+      tex.wrapS = THREE.RepeatWrapping;
+      tex.wrapT = THREE.RepeatWrapping;
+      tex.repeat.set(5, 2.5);
+      return tex;
+    }
+
+    function createTileTexture(bgHex, lineHex, count = 8) {
+      const canvas = document.createElement('canvas');
+      canvas.width = 256;
+      canvas.height = 256;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = bgHex;
+      ctx.fillRect(0, 0, 256, 256);
+      ctx.strokeStyle = lineHex;
+      ctx.lineWidth = 2;
+      const step = 256 / count;
+      for (let i = 0; i <= count; i++) {
+        ctx.beginPath();
+        ctx.moveTo(i * step, 0); ctx.lineTo(i * step, 256);
+        ctx.moveTo(0, i * step); ctx.lineTo(256, i * step);
+        ctx.stroke();
+      }
+      const tex = new THREE.CanvasTexture(canvas);
+      tex.wrapS = THREE.RepeatWrapping;
+      tex.wrapT = THREE.RepeatWrapping;
+      tex.repeat.set(4, 4);
+      return tex;
+    }
+
+    function createWaveRugTexture() {
+      const canvas = document.createElement('canvas');
+      canvas.width = 512;
+      canvas.height = 768;
+      const ctx = canvas.getContext('2d');
+      // 6 bandes orientées Nord (haut = -Z, côté table bois/mer) -> Sud (bas = +Z, côté double porte Chambre)
+      const bands = ['#1E3A8A', '#2563EB', '#60A5FA', '#67D4D0', '#A7E6D7', '#F5F2E8'];
+      const bh = 768 / bands.length;
+      bands.forEach((col, i) => {
+        ctx.fillStyle = col;
+        ctx.fillRect(0, i * bh, 512, bh + 2);
+      });
+      ctx.strokeStyle = 'rgba(255,255,255,0.45)';
+      ctx.lineWidth = 8;
+      for (let i = 1; i < bands.length; i++) {
+        const y = i * bh;
+        ctx.beginPath();
+        for (let x = 0; x <= 512; x += 16) {
+          ctx.lineTo(x, y + Math.sin(x * 0.03) * 14);
+        }
+        ctx.stroke();
+      }
+      const tex = new THREE.CanvasTexture(canvas);
+      tex.colorSpace = THREE.SRGBColorSpace;
+      return tex;
+    }
+
+    function createPersianRugTexture() {
+      const canvas = document.createElement('canvas');
+      canvas.width = 512;
+      canvas.height = 512;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#94B2C6';
+      ctx.fillRect(0, 0, 512, 512);
+      ctx.fillStyle = '#C4E0DE';
+      ctx.fillRect(36, 36, 440, 440);
+      ctx.strokeStyle = '#1E3A8A';
+      ctx.lineWidth = 10;
+      ctx.strokeRect(36, 36, 440, 440);
+      ctx.fillStyle = '#FEF9E7';
+      ctx.beginPath();
+      ctx.moveTo(200, 170); ctx.lineTo(312, 170); ctx.lineTo(360, 218);
+      ctx.lineTo(360, 294); ctx.lineTo(312, 342); ctx.lineTo(200, 342);
+      ctx.lineTo(152, 294); ctx.lineTo(152, 218); ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      const tex = new THREE.CanvasTexture(canvas);
+      tex.colorSpace = THREE.SRGBColorSpace;
+      return tex;
+    }
+
+    const texLoader = new THREE.TextureLoader();
+    function loadRealRepeatingTex(url, rx, ry, fallbackTex) {
+      if (!url) return fallbackTex;
+      // Start with the canvas fallback image so the texture is NEVER black while loading
+      const t = fallbackTex.clone();
+      t.needsUpdate = true;
+      texLoader.load(
+        url,
+        (loaded) => {
+          t.image = loaded.image;
+          t.colorSpace = THREE.SRGBColorSpace;
+          t.wrapS = THREE.RepeatWrapping;
+          t.wrapT = THREE.RepeatWrapping;
+          t.repeat.set(rx, ry);
+          t.needsUpdate = true;
+        },
+        undefined,
+        () => {}
+      );
+      return t;
+    }
+
+    const texPineActuel = loadRealRepeatingTex('textures/tex_parquet.jpg', 3, 3, createPineFloorTexture(false));
+    const texPineRenove = createPineFloorTexture(true);
+    const texWallLeaf70s = loadRealRepeatingTex('textures/tex_wallpaper_salon.jpg', 4, 2, create70sLeafWallpaperTexture());
+    const texWallFloral70s = loadRealRepeatingTex('textures/tex_wallpaper_entree.jpg', 3, 2, create70sFloralWallpaperTexture());
+    const texTilesBrown70s = createTileTexture('#B56734', '#6E3B1A', 8);
+    const texKitchenLino70s = loadRealRepeatingTex('textures/tex_lino_cuisine.jpg', 3, 3, createTileTexture('#D8C8A8', '#B8A482', 8));
+    const texTilesKitchenRenove = createTileTexture('#EAE4D9', '#CBD5E1', 6);
+    const texTilesWhiteSdb = createTileTexture('#F4F8FA', '#CBD5E1', 8);
+    const texRealWaveRug = loadRealRepeatingTex('textures/tex_rug_salon.jpg', 1, 1, createWaveRugTexture());
+    const texRealPersianRug = loadRealRepeatingTex('textures/tex_rug_chambre.jpg', 1, 1, createPersianRugTexture());
+
+    // --- MATERIALS ---
+    const matWallWhite = new THREE.MeshStandardMaterial({ color: 0xFAF7F2, roughness: 0.82 });
+    const matWallLeaf = new THREE.MeshStandardMaterial({ map: texWallLeaf70s, roughness: 0.85 });
+    const matWallFloral = new THREE.MeshStandardMaterial({ map: texWallFloral70s, roughness: 0.85 });
+    const matWallEmerald = new THREE.MeshStandardMaterial({ color: 0x1D5B52, roughness: 0.8 });
+
+    const matFloorPine = new THREE.MeshStandardMaterial({ map: texPineActuel, roughness: 0.65 });
+    const matFloorKitchen = new THREE.MeshStandardMaterial({ map: texKitchenLino70s, roughness: 0.55 });
+    const matFloorSdb = new THREE.MeshStandardMaterial({ map: texTilesWhiteSdb, roughness: 0.45 });
+    const matFloorLoggia = new THREE.MeshStandardMaterial({ color: 0xCBD5E1, roughness: 0.5 });
+
+    const matHoneyWood = new THREE.MeshStandardMaterial({ color: 0xC88A4B, roughness: 0.55 });
+    const matLightOak = new THREE.MeshStandardMaterial({ color: 0xDFC39D, roughness: 0.55 });
+    const matDarkTimber = new THREE.MeshStandardMaterial({ color: 0x4A2E1B, roughness: 0.75 });
+    const matRattan = new THREE.MeshStandardMaterial({ color: 0xD6B27C, roughness: 0.7 });
+    const matWhiteWood = new THREE.MeshStandardMaterial({ color: 0xFFFFFF, roughness: 0.45 });
+    const matGlass = new THREE.MeshPhysicalMaterial({
+      color: 0xD8F3FE,
+      transparent: true,
+      opacity: 0.36,
+      roughness: 0.08,
+      transmission: 0.62
+    });
+    const matSheerCurtain = new THREE.MeshStandardMaterial({
+      color: 0xFFFFFF,
+      transparent: true,
+      opacity: 0.65,
+      roughness: 0.9
+    });
+    const matMirror = new THREE.MeshStandardMaterial({ color: 0xE2E8F0, metalness: 0.85, roughness: 0.12 });
+    const matRoyalBlue = new THREE.MeshStandardMaterial({ color: 0x1D4ED8, roughness: 0.8 });
+    const matKitchenCounter = new THREE.MeshStandardMaterial({ map: texTilesBrown70s, roughness: 0.5 });
+    const matKitchenSink = new THREE.MeshStandardMaterial({ color: 0xEA580C, roughness: 0.35 });
+    const matSofaCloth = new THREE.MeshStandardMaterial({ color: 0x285E56, roughness: 0.85 });
+
+    const allEdgeLines = [];
+    const lineMat = new THREE.LineBasicMaterial({ color: 0x1E293B, transparent: true, opacity: 0.28 });
+
+    function addEdges(mesh, threshold = 25) {
+      const edges = new THREE.EdgesGeometry(mesh.geometry, threshold);
+      const line = new THREE.LineSegments(edges, lineMat);
+      line.visible = false; // ZÉRO LIGNE CLAIRE PAR DÉFAUT (Rendu photoréaliste doux)
+      mesh.userData.edgeLine = line;
+      mesh.add(line);
+      allEdgeLines.push(line);
+    }
+
+    function createBox(w, h, d, mat, x, y, z, parent = scene, withEdges = true) {
+      // Utilise RoundedBoxGeometry pour supprimer l'aspect cubique sur le mobilier et les boiseries
+      const minDim = Math.min(w, h, d);
+      const isStructural = (Math.max(w, h, d) > 2.60 && minDim < 0.25);
+      const radius = isStructural ? 0.008 : Math.min(0.045, minDim * 0.18);
+      const geo = new RoundedBoxGeometry(w, h, d, 3, radius);
+      const mesh = new THREE.Mesh(geo, mat);
+      mesh.position.set(x, y, z);
+      mesh.castShadow = true;
+      mesh.receiveShadow = true;
+      parent.add(mesh);
+      if (withEdges) addEdges(mesh);
+      return mesh;
+    }
+
+    // =========================================================================
+    // SPACIOUS PROPORTIONS & EXACT TOPOLOGY (100% Verified with Guillaume)
+    // - WALL_H = 3.05 m (High Anglo-Norman ceiling with tall windows!)
+    // - Tall Windows: height = 1.98 m (sill at 0.68 m -> top at 2.66 m!)
+    // - Tall French Doors: height = 2.52 m!
+    // - Salle de Bain (SDB): 100% SOLID WALLS (MUR PLEIN, ZERO WINDOW)!
+    // - Toilettes (WC): TALL NARROW PETITS-BOIS WINDOW at back wall + Cast-Iron Pipe!
+    // - Grand Couloir / Galerie d'Entrée ("Fleurs 70s"): Spacious long corridor (4.45 m long x 2.75 m wide) leading straight to Cuisine Vue Mer!
+    // =========================================================================
+    const apartmentGroup = new THREE.Group();
+    scene.add(apartmentGroup);
+
+    const WALL_H = 3.05;
+
+    // Default generous scale (1.22x) so rooms feel airy and true to life
+    apartmentGroup.scale.set(1.22, 1.0, 1.22);
+
+    // --- 1. EXTERIOR CONTEXT : 3 ÉTAGES (RDC DAMIER + ARCADES SOUS NOTRE 1er ÉTAGE), COUR AVANT PAVÉE AVEC VOITURE GARÉE, RUE, CABINES BLANCHES, SABLE & MER ---
+    const envGroup = new THREE.Group();
+    scene.add(envGroup);
+
+    const RDC_H = 2.80; // Notre appartement (1er étage) est à Y = 0.00, donc le sol de la cour et de la rue est à Y = -2.80 !
+
+    // Sol général au niveau de la rue / cour / jardin (Y = -2.85)
+    createBox(36, 0.20, 38, new THREE.MeshStandardMaterial({ color: 0xD8D0C2, roughness: 0.9 }), 0, -RDC_H - 0.12, 1.0, envGroup, false);
+
+    // A. REZ-DE-CHAUSSÉE (RDC) SOUS NOTRE APPARTEMENT DU 1er ÉTAGE (Y de -2.80 à 0.00)
+    const rdcBrickMat = new THREE.MeshStandardMaterial({ color: 0x991B1B, roughness: 0.8 });
+    const rdcStoneMat = new THREE.MeshStandardMaterial({ color: 0xF5EFE0, roughness: 0.8 });
+    // Volume du RDC sous l'appartement
+    createBox(10.8, RDC_H, 9.6, rdcStoneMat, 0.2, -RDC_H / 2, 0.2, envGroup, false);
+    // Damier brique/pierre sur la façade Nord du RDC (Z = -4.62) à gauche et à droite des 3 arcades
+    for (let row = 0; row < 5; row++) {
+      for (let col = 0; col < 6; col++) {
+        const isRed = (row + col) % 2 === 0;
+        const m = isRed ? rdcBrickMat : rdcStoneMat;
+        createBox(0.38, 0.44, 0.08, m, -4.6 + col * 0.40, -2.45 + row * 0.46, -4.62, envGroup, false);
+        createBox(0.38, 0.44, 0.08, m, 3.0 + col * 0.40, -2.45 + row * 0.46, -4.62, envGroup, false);
+      }
+    }
+    // 3 Grandes portes-fenêtres cintrées en arcades blanches au centre du RDC Nord
+    [-1.6, 0.2, 2.0].forEach(ax => {
+      createBox(1.25, 2.25, 0.12, matWhiteWood, ax, -1.62, -4.62, envGroup, false);
+      createBox(1.05, 2.05, 0.14, matGlass, ax, -1.65, -4.61, envGroup, false);
+    });
+
+    // B. COUR AVANT PAVÉE OCRE (Z = -4.65 à -8.40, Y = -2.80) + HAIE + PORTILLON BLANC + VOITURES GARÉES !
+    createBox(13.5, 0.08, 3.80, new THREE.MeshStandardMaterial({ color: 0xE6B88A, roughness: 0.85 }), 0.2, -RDC_H + 0.02, -6.50, envGroup, false);
+    // Haie verte + Portillon blanc devant la cour
+    createBox(5.6, 1.05, 0.38, new THREE.MeshStandardMaterial({ color: 0x3F6212, roughness: 0.9 }), -3.6, -RDC_H + 0.52, -8.35, envGroup, false);
+    createBox(5.6, 1.05, 0.38, new THREE.MeshStandardMaterial({ color: 0x3F6212, roughness: 0.9 }), 4.0, -RDC_H + 0.52, -8.35, envGroup, false);
+    createBox(1.85, 1.00, 0.12, matWhiteWood, 0.2, -RDC_H + 0.50, -8.35, envGroup, false);
+
+    // Fonction pour construire une voiture 3D garée dans la cour (comme sur les photos façade Nord / Drone)
+    function createParkedCar(x, y, z, rotY, bodyHex) {
+      const car = new THREE.Group();
+      car.position.set(x, y, z);
+      car.rotation.y = rotY;
+      const bodyMat = new THREE.MeshStandardMaterial({ color: bodyHex, metalness: 0.45, roughness: 0.35 });
+      const wheelMat = new THREE.MeshStandardMaterial({ color: 0x1E293B, roughness: 0.8 });
+      createBox(2.05, 0.52, 1.02, bodyMat, 0, 0.38, 0, car, false);
+      createBox(1.15, 0.44, 0.92, bodyMat, -0.10, 0.82, 0, car, false);
+      createBox(1.18, 0.36, 0.94, matGlass, -0.10, 0.82, 0, car, false);
+      [[-0.65, -0.50], [0.65, -0.50], [-0.65, 0.50], [0.65, 0.50]].forEach(([wx, wz]) => {
+        const w = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.22, 0.16, 16), wheelMat);
+        w.rotation.x = Math.PI / 2;
+        w.position.set(wx, 0.22, wz);
+        car.add(w);
+      });
+      envGroup.add(car);
+    }
+    // Voiture principale garée à droite dans la cour avant + 2e voiture à gauche
+    createParkedCar(3.55, -RDC_H + 0.05, -6.35, -0.08, 0x334155);
+    createParkedCar(-3.65, -RDC_H + 0.05, -6.55, 0.12, 0x475569);
+
+    // C. RUE (28 AVENUE DE LA RÉPUBLIQUE + PASSAGE PIÉTON), CABINES BLANCHES, PLAGE DE SABLE & MER (LA MANCHE)
+    createBox(36, 0.08, 2.20, new THREE.MeshStandardMaterial({ color: 0x64748B, roughness: 0.85 }), 0, -RDC_H + 0.02, -9.65, envGroup, false);
+    // Bandes blanches du passage piéton
+    for (let sz = -10.4; sz <= -8.9; sz += 0.32) {
+      createBox(1.60, 0.09, 0.16, matWhiteWood, -2.5, -RDC_H + 0.03, sz, envGroup, false);
+    }
+    // Plage de sable blond (Z = -10.8 à -14.2)
+    createBox(36, 0.09, 3.40, new THREE.MeshStandardMaterial({ color: 0xFDE68A, roughness: 0.9 }), 0, -RDC_H + 0.03, -12.50, envGroup, false);
+    // Mer (La Manche) + Voiliers au large (Z = -14.2 à -22.0)
+    createBox(36, 0.08, 8.00, new THREE.MeshStandardMaterial({ color: 0x0284C7, roughness: 0.22 }), 0, -RDC_H + 0.02, -18.20, envGroup, false);
+
+    // 10 Cabines de plage blanches à toit pointu alignées sur la promenade/plage
+    const cabinRoofColors = [0x475569, 0x3B82F6, 0x8C4E33, 0x475569, 0x2E6F65, 0x475569, 0x3B82F6, 0x8C4E33, 0x475569, 0x2E6F65];
+    for (let i = 0; i < 10; i++) {
+      const cx = -9.5 + i * 2.1;
+      const cz = -11.35;
+      const cabin = new THREE.Group();
+      cabin.position.set(cx, -RDC_H + 0.05, cz);
+      createBox(0.88, 1.05, 0.88, matWhiteWood, 0, 0.52, 0, cabin, false);
+      const roofMesh = new THREE.Mesh(
+        new THREE.ConeGeometry(0.72, 0.52, 4),
+        new THREE.MeshStandardMaterial({ color: cabinRoofColors[i], roughness: 0.7 })
+      );
+      roofMesh.position.set(0, 1.28, 0);
+      roofMesh.rotation.y = Math.PI / 4;
+      cabin.add(roofMesh);
+      envGroup.add(cabin);
+    }
+    // 3 Voiliers blancs sur la mer
+    [[-5.5, -16.8], [1.2, -18.2], [6.8, -16.5]].forEach(([sx, sz]) => {
+      const boat = new THREE.Group();
+      boat.position.set(sx, -RDC_H + 0.08, sz);
+      createBox(0.95, 0.18, 0.32, matWhiteWood, 0, 0.09, 0, boat, false);
+      const sail = new THREE.Mesh(new THREE.ConeGeometry(0.35, 1.15, 3), matWhiteWood);
+      sail.position.set(0, 0.72, 0);
+      boat.add(sail);
+      envGroup.add(boat);
+    });
+
+    // D. SUD : FAÇADE RDC DAMIER NORMAND + VOLETS VERTS + TERRASSE PAVÉE + GRAND JARDIN ARBORÉ DE 526 M²
+    const greenShutterMat = new THREE.MeshStandardMaterial({ color: 0x2F5E41, roughness: 0.75 });
+    // Damier brique/pierre au RDC côté Jardin Sud (sous la Loggia et sous l'aile Ouest, Z = +4.15 à +6.75)
+    for (let row = 0; row < 5; row++) {
+      for (let col = 0; col < 10; col++) {
+        const isRed = (row + col) % 2 === 0;
+        const m = isRed ? rdcBrickMat : rdcStoneMat;
+        createBox(0.42, 0.44, 0.08, m, -4.6 + col * 0.44, -2.45 + row * 0.46, 4.82, envGroup, false);
+      }
+    }
+    // Porte-fenêtre blanche du RDC Sud + Volets verts ouvrant sur la terrasse arrière
+    createBox(1.30, 2.15, 0.12, matWhiteWood, -0.65, -1.68, 4.85, envGroup, false);
+    createBox(1.10, 1.95, 0.14, matGlass, -0.65, -1.68, 4.86, envGroup, false);
+    createBox(0.52, 2.10, 0.10, greenShutterMat, -1.58, -1.68, 4.88, envGroup, false);
+    createBox(0.52, 2.10, 0.10, greenShutterMat, 0.28, -1.68, 4.88, envGroup, false);
+
+    // Terrasse pavée ocre-terracotta au pied du RDC Sud (divisée en Terrasse Ouest sous Loggia + Terrasse Est + Allée pavée latérale droite)
+    const matTerracottaPatio = new THREE.MeshStandardMaterial({ color: 0xD9A97C, roughness: 0.8 });
+    createBox(6.2, 0.10, 3.60, matTerracottaPatio, -1.6, -RDC_H + 0.04, 6.50, envGroup, false); // Terrasse Ouest
+    createBox(6.4, 0.10, 3.80, matTerracottaPatio, 4.8, -RDC_H + 0.04, 6.60, envGroup, false);  // Terrasse Est
+    createBox(1.8, 0.10, 12.80, matTerracottaPatio, 8.2, -RDC_H + 0.04, 0.20, envGroup, false); // Allée pavée latérale Est
+    createBox(36, 0.09, 13.5, new THREE.MeshStandardMaterial({ color: 0x5E9A4E, roughness: 0.9 }), 0, -RDC_H + 0.03, 13.8, envGroup, false);
+
+    // Mobilier de la Terrasse Ouest (table ronde jaune + 2 chaises blanches + coffre vert contre le mur du RDC)
+    const yellowTable = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.42, 0.72, 18), new THREE.MeshStandardMaterial({ color: 0xEAB308, roughness: 0.6 }));
+    yellowTable.position.set(-2.45, -RDC_H + 0.42, 6.35);
+    envGroup.add(yellowTable);
+    createBox(0.42, 0.75, 0.42, matWhiteWood, -3.05, -RDC_H + 0.42, 6.35, envGroup, false);
+    createBox(0.42, 0.75, 0.42, matWhiteWood, -1.85, -RDC_H + 0.42, 6.35, envGroup, false);
+    createBox(0.95, 0.62, 0.48, new THREE.MeshStandardMaterial({ color: 0x1E4631, roughness: 0.75 }), -0.15, -RDC_H + 0.36, 5.25, envGroup, false); // Coffre vert
+
+    // Mobilier de la Terrasse Est (table rectangulaire grise + table à chaises vert anis)
+    createBox(1.35, 0.74, 0.85, new THREE.MeshStandardMaterial({ color: 0x64748B, roughness: 0.6 }), 2.85, -RDC_H + 0.42, 6.40, envGroup, false);
+    createBox(0.95, 0.74, 0.95, matWhiteWood, 5.65, -RDC_H + 0.42, 6.55, envGroup, false);
+    createBox(0.44, 0.76, 0.44, new THREE.MeshStandardMaterial({ color: 0x84CC16, roughness: 0.7 }), 5.05, -RDC_H + 0.42, 6.55, envGroup, false);
+    createBox(0.44, 0.76, 0.44, new THREE.MeshStandardMaterial({ color: 0x84CC16, roughness: 0.7 }), 6.25, -RDC_H + 0.42, 6.55, envGroup, false);
+
+    // Muret central en biais divisant le jardin en 2 parties + petit portillon blanc (exactement comme sur les photos !)
+    const centralGardenWall = createBox(0.18, 1.15, 13.8, new THREE.MeshStandardMaterial({ color: 0xD6C7B2, roughness: 0.85 }), 1.85, -RDC_H + 0.60, 11.9, envGroup, false);
+    centralGardenWall.rotation.y = -0.08;
+    createBox(0.12, 1.05, 0.95, matWhiteWood, 1.55, -RDC_H + 0.56, 6.15, envGroup, false); // Portillon blanc
+
+    // Massifs de fleurs colorées (roses, rouges, jaunes) le long du muret central côté pelouse Ouest
+    [[1.25, 9.2, 0xEC4899], [1.35, 10.6, 0xEF4444], [1.45, 12.0, 0xFACC15], [1.55, 13.4, 0xEC4899]].forEach(([fx, fz, fcol]) => {
+      const fl = new THREE.Mesh(new THREE.SphereGeometry(0.38, 12, 10), new THREE.MeshStandardMaterial({ color: fcol, roughness: 0.8 }));
+      fl.position.set(fx, -RDC_H + 0.28, fz);
+      envGroup.add(fl);
+    });
+
+    // Buisson central taillé au milieu de la pelouse Ouest
+    const centralBush = new THREE.Mesh(new THREE.SphereGeometry(1.15, 16, 14), new THREE.MeshStandardMaterial({ color: 0x2D5A36, roughness: 0.9 }));
+    centralBush.position.set(-1.35, -RDC_H + 0.95, 11.5);
+    envGroup.add(centralBush);
+
+    // Cabanon de jardin blanc à toit en pente rouge vif dans le coin bas-gauche (Sud-Ouest) !
+    const shedGroup = new THREE.Group();
+    shedGroup.position.set(-6.8, -RDC_H + 0.05, 16.2);
+    shedGroup.rotation.y = 0.12;
+    createBox(2.4, 1.9, 2.2, matWhiteWood, 0, 0.95, 0, shedGroup, false);
+    const shedRoof = createBox(2.65, 0.16, 2.45, new THREE.MeshStandardMaterial({ color: 0xB91C1C, roughness: 0.65 }), 0, 1.98, 0, shedGroup, false);
+    shedRoof.rotation.x = 0.18;
+    envGroup.add(shedGroup);
+
+    // Clôture en panneaux beiges au fond du jardin + haie vive latérale gauche et droite
+    createBox(18.5, 1.25, 0.16, new THREE.MeshStandardMaterial({ color: 0xC8B092, roughness: 0.85 }), 0.2, -RDC_H + 0.62, 18.8, envGroup, false);
+    createBox(0.45, 1.85, 22.0, new THREE.MeshStandardMaterial({ color: 0x2E5A32, roughness: 0.9 }), -6.2, -RDC_H + 0.92, 6.5, envGroup, false); // Haie de lierre gauche
+    const rightIvyWall = createBox(0.55, 2.10, 22.5, new THREE.MeshStandardMaterial({ color: 0x365E38, roughness: 0.9 }), 9.6, -RDC_H + 1.05, 4.5, envGroup, false); // Mur de lierre en biais à droite
+    rightIvyWall.rotation.y = -0.16;
+
+    // Arbres fidèles aux photos : Grand arbre touffu à gauche (au-dessus du cabanon) + Grand arbre majestueux au tronc incliné à droite près du muret central
+    [[-5.6, 12.2, 1.85], [3.35, 9.6, 2.05]].forEach(([tx, tz, rad]) => {
+      const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.34, 2.9, 10), matDarkTimber);
+      trunk.position.set(tx, -RDC_H + 1.4, tz);
+      envGroup.add(trunk);
+      const crown = new THREE.Mesh(new THREE.SphereGeometry(rad, 16, 14), new THREE.MeshStandardMaterial({ color: 0x3B7A47, roughness: 0.85 }));
+      crown.position.set(tx, -RDC_H + 3.6, tz);
+      envGroup.add(crown);
+    });
+
+    // TRUCS LATÉRAUX À GAUCHE (OUEST) : Villa voisine anglo-normande en briques rouges et pierres blanches + verrière zinguée + balustrade blanche
+    const westNeighborVilla = new THREE.Group();
+    westNeighborVilla.position.set(-8.8, -RDC_H, -1.8);
+    createBox(4.2, 6.8, 7.6, rdcBrickMat, 0, 3.4, 0, westNeighborVilla, false);
+    createBox(4.3, 0.45, 7.7, rdcStoneMat, 0, 6.9, 0, westNeighborVilla, false); // Balustrade pierre blanche
+    createBox(3.4, 0.25, 6.8, new THREE.MeshStandardMaterial({ color: 0x64748B, metalness: 0.5, roughness: 0.3 }), 0, 7.05, 0, westNeighborVilla, false); // Verrière zinc
+    [-1.8, 0.8].forEach(wz => {
+      createBox(0.18, 2.2, 1.35, rdcStoneMat, 2.12, 4.2, wz, westNeighborVilla, false); // Fenêtres en arcades blanches
+      createBox(0.18, 2.0, 1.35, rdcStoneMat, 2.12, 1.5, wz, westNeighborVilla, false);
+    });
+    envGroup.add(westNeighborVilla);
+
+    // TRUCS LATÉRAUX À DROITE (EST) : Immeuble voisin normand à colombages et grands balcons en bois foncé
+    const normanCreamMat = new THREE.MeshStandardMaterial({ color: 0xF5EFE0, roughness: 0.85 });
+    const normanRoofMat = new THREE.MeshStandardMaterial({ color: 0x5C3422, roughness: 0.75 });
+    const eastNeighborBldg = new THREE.Group();
+    eastNeighborBldg.position.set(12.8, -RDC_H, -3.2);
+    createBox(4.4, 7.4, 7.2, normanCreamMat, 0, 3.7, 0, eastNeighborBldg, false);
+    createBox(0.9, 0.18, 7.4, matDarkTimber, -2.4, 3.2, 0, eastNeighborBldg, false); // Balcon bois 1er
+    createBox(0.9, 0.85, 7.4, matDarkTimber, -2.8, 3.6, 0, eastNeighborBldg, false); // Garde-corps bois noir 1er
+    createBox(0.9, 0.18, 7.4, matDarkTimber, -2.4, 5.6, 0, eastNeighborBldg, false); // Balcon bois 2e
+    createBox(0.9, 0.85, 7.4, matDarkTimber, -2.8, 6.0, 0, eastNeighborBldg, false); // Garde-corps bois noir 2e
+    envGroup.add(eastNeighborBldg);
+
+    // --- 2. APARTMENT FLOORS AU 1er ÉTAGE (AVEC LE VRAI DÉCALAGE DE ①-② PAR RAPPORT À ③-④) ---
+    // ③ Salon Vue Mer (~16,5 m² : X de -2.80 à +1.50 = 4.30m, Z de -4.20 à 0.00 = 4.20m)
+    createBox(4.30, 0.08, 4.20, matFloorPine, -0.65, -0.04, -2.10, apartmentGroup, false);
+    // ② Cuisine Vue Mer (~7,5 m² : X de +1.50 à +4.25 = 2.75m, Z de -4.20 à -1.00 = 3.20m)
+    createBox(2.75, 0.08, 3.20, matFloorKitchen, 2.875, -0.04, -2.60, apartmentGroup, false);
+    // ④ Chambre Vert Canard (~13,5 m² : X de -2.80 à +1.50 = 4.30m, Z de 0.00 à +4.10 = 4.10m)
+    createBox(4.30, 0.08, 4.10, matFloorPine, -0.65, -0.04, 2.05, apartmentGroup, false);
+    // ① Entrée Fleurie (~6,5 m² DÉCALÉE VERS LA MER : X de +1.50 à +4.25 = 2.75m, Z de -1.00 à +2.45 = 3.45m -> s'arrête au milieu du lit double de ④ !)
+    createBox(2.75, 0.08, 3.45, matFloorPine, 2.875, -0.04, 0.725, apartmentGroup, false);
+    // Cage d'escalier centrale / Palier dans le décroché en L au Sud de ① (X de +1.55 à +4.25, Z de +2.45 à +4.10)
+    createBox(2.70, 0.08, 1.65, new THREE.MeshStandardMaterial({ color: 0xD6CFC2, roughness: 0.85 }), 2.90, -0.04, 3.275, apartmentGroup, false);
+    // ⑤ Salle de Bain (~3,2 m²) & ⑥ Petit Couloir + WC (~1,8 m²) (X de -4.90 à -2.80 = 2.10m, Z de -0.10 à +3.60 = 3.70m)
+    createBox(2.10, 0.08, 3.70, matFloorSdb, -3.85, -0.04, 1.75, apartmentGroup, false);
+    // ⑦ Loggia Couverte Sud (12,0 m² au sol : X de -2.80 à +1.50 = 4.30m, Z de +4.10 à +6.80 = 2.70m)
+    createBox(4.30, 0.08, 2.70, matFloorLoggia, -0.65, -0.04, 5.45, apartmentGroup, false);
+
+    // --- 3. SMART CUTAWAY WALLS & TALL WINDOWS SYSTEM ---
+    const cutawayWalls = [];
+    function createSmartWallGroup(nx, nz) {
+      const g = new THREE.Group();
+      g.userData.normal = new THREE.Vector3(nx, 0, nz).normalize();
+      apartmentGroup.add(g);
+      cutawayWalls.push(g);
+      return g;
+    }
+
+    // Tall Anglo-Norman Multi-Pane Window ("Haute fenêtre à petits bois")
+    function createTallPetitsBoisWindow(w, h, panesX, panesY, x, y, z, rotY, parent, withCurtain = false) {
+      const winGroup = new THREE.Group();
+      winGroup.position.set(x, y, z);
+      winGroup.rotation.y = rotY;
+      // Frame & deep molded sill
+      createBox(w, 0.07, 0.16, matWhiteWood, 0, h / 2 - 0.035, 0, winGroup);
+      createBox(w + 0.08, 0.08, 0.22, matWhiteWood, 0, -h / 2 + 0.04, 0, winGroup);
+      createBox(0.07, h, 0.16, matWhiteWood, -w / 2 + 0.035, 0, 0, winGroup);
+      createBox(0.07, h, 0.16, matWhiteWood, w / 2 - 0.035, 0, 0, winGroup);
+      // Glass
+      createBox(w - 0.12, h - 0.12, 0.02, matGlass, 0, 0, 0, winGroup, false);
+      // Petits bois muntins
+      for (let ix = 1; ix < panesX; ix++) {
+        const px = -w / 2 + (w / panesX) * ix;
+        createBox(0.038, h - 0.10, 0.07, matWhiteWood, px, 0, 0, winGroup);
+      }
+      for (let iy = 1; iy < panesY; iy++) {
+        const py = -h / 2 + (h / panesY) * iy;
+        createBox(w - 0.10, 0.032, 0.07, matWhiteWood, 0, py, 0, winGroup);
+      }
+      if (withCurtain) {
+        // Sheer white voilage curtain inside the window (as seen in WC photo 07!)
+        createBox(w - 0.16, h - 0.18, 0.03, matSheerCurtain, 0, 0, 0.05, winGroup, false);
+      }
+      parent.add(winGroup);
+      return winGroup;
+    }
+
+    // --- NORTH WALL (SEA FACADE, Z = -4.20) : VERY TALL WINDOWS (1.98 m high!) ---
+    const wallNorth = createSmartWallGroup(0, -1);
+    // Séjour North Wall around Tall Triple Sea Window (X: -2.80 to +1.50, Window width = 2.45m, height = 1.98m, sill = 0.65m)
+    createBox(0.925, WALL_H, 0.22, matWallWhite, -2.3375, WALL_H / 2, -4.20, wallNorth);
+    createBox(0.925, WALL_H, 0.22, matWallWhite, 1.0375, WALL_H / 2, -4.20, wallNorth);
+    createBox(2.45, 0.65, 0.22, matWallWhite, -0.65, 0.325, -4.20, wallNorth); // Low sill (0.65m)
+    createBox(2.45, 0.42, 0.22, matWallWhite, -0.65, WALL_H - 0.21, -4.20, wallNorth);
+    createBox(2.55, 0.24, 0.28, matWhiteWood, -0.65, 2.76, -4.10, wallNorth); // Coffre volet roulant
+    createTallPetitsBoisWindow(2.45, 1.98, 3, 5, -0.65, 1.64, -4.20, 0, wallNorth);
+
+    // Tall Royal Blue Curtains framing Séjour Sea Window
+    const curtainL = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.17, 2.72, 14), matRoyalBlue);
+    curtainL.position.set(-1.98, 1.38, -4.00);
+    wallNorth.add(curtainL);
+    const curtainR = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.17, 2.72, 14), matRoyalBlue);
+    curtainR.position.set(0.68, 1.38, -4.00);
+    wallNorth.add(curtainR);
+
+    // Cuisine North Wall around Tall Triple Sea Window (X: +1.50 to +4.25, Window width = 1.55m, height = 1.88m)
+    createBox(0.60, WALL_H, 0.22, matWallWhite, 1.80, WALL_H / 2, -4.20, wallNorth);
+    createBox(0.60, WALL_H, 0.22, matWallWhite, 3.95, WALL_H / 2, -4.20, wallNorth);
+    createBox(1.55, 0.78, 0.22, matWallWhite, 2.875, 0.39, -4.20, wallNorth);
+    createBox(1.55, 0.39, 0.22, matWallWhite, 2.875, WALL_H - 0.195, -4.20, wallNorth);
+    createBox(1.65, 0.24, 0.28, matWhiteWood, 2.875, 2.76, -4.10, wallNorth);
+    createTallPetitsBoisWindow(1.55, 1.88, 3, 5, 2.875, 1.72, -4.20, 0, wallNorth);
+
+    // --- WEST WALL OF SÉJOUR (X = -2.80, Z from -4.20 to 0.00) ---
+    const wallWestSejour = createSmartWallGroup(-1, 0);
+    createBox(0.20, WALL_H, 4.20, matWallWhite, -2.85, WALL_H / 2, -2.10, wallWestSejour);
+    const sejourWestInner = createBox(0.04, WALL_H - 0.12, 4.14, matWallLeaf, -2.73, WALL_H / 2 + 0.04, -2.10, wallWestSejour, false);
+    createBox(0.06, 0.12, 4.16, matWhiteWood, -2.73, 0.06, -2.10, wallWestSejour, false);
+    // Aussi papier peint feuilles 70s sur le mur Est du Séjour (autour de la cheminée, comme sur les Photos 01 & 02 !)
+    const sejourEastInner = createBox(0.03, WALL_H - 0.12, 4.10, matWallLeaf, 1.41, WALL_H / 2 + 0.04, -2.10, apartmentGroup, false);
+
+    // =========================================================================
+    // AILE OUEST : SALLE D'EAU (Photo 06) & WC INDÉPENDANT (Photo 07)
+    // - Photo 06 (Salle d'Eau) :
+    //   * Mur du fond (Nord, Z = -0.10) = 100% MUR PLEIN (avec Lave-linge + Gros Cumulus à gauche, Lavabo colonne + Miroir + Bambou au centre, Cabine Douche vitrée à droite) !
+    //   * Mur côté extérieur (Ouest Casino, X = -4.90) = Meuble bas blanc en pan coupé + Fenêtre extérieure à petits bois avec voilages verts (exactement comme sur la Photo 06 et le mail de Raymond du 01/06/2014) !
+    // - Photo 07 (WC Indépendant) :
+    //   * Haute fenêtre étroite à petits bois avec voilage blanc sur la façade Ouest + Colonne montante en fonte dans l'angle gauche + Petit meuble papier toilette sous la fenêtre !
+    // =========================================================================
+    const wallWestWing = new THREE.Group();
+    apartmentGroup.add(wallWestWing);
+
+    // 1. Mur du fond de la Salle d'Eau (Nord, Z = -0.10) — 100% MUR PLEIN CARRELÉ (derrière Cumulus, Lave-linge, Lavabo & Douche !)
+    createBox(2.10, WALL_H, 0.18, matWallWhite, -3.85, WALL_H / 2, -0.10, wallWestWing);
+    createBox(2.04, 2.25, 0.03, matFloorSdb, -3.85, 1.125, 0.01, wallWestWing, false);
+
+    // 2. Mur extérieur Ouest de la Salle d'Eau (X = -4.90, Z de -0.10 à +2.20) — Avec sa fenêtre côté extérieur à voilages verts (Photo 06) au-dessus du meuble bas blanc !
+    createBox(0.20, WALL_H, 0.45, matWallWhite, -4.90, WALL_H / 2, 0.125, wallWestWing);
+    createBox(0.20, 1.05, 1.25, matWallWhite, -4.90, 0.525, 0.975, wallWestWing); // Allège derrière le meuble bas blanc
+    createBox(0.20, 0.40, 1.25, matWallWhite, -4.90, WALL_H - 0.20, 0.975, wallWestWing);
+    const sdbExtWin = createTallPetitsBoisWindow(1.20, 1.60, 2, 4, -4.90, 1.85, 0.975, Math.PI / 2, wallWestWing, false);
+    // Voilages verts tendres sur la fenêtre extérieure de la Salle d'Eau (Photo 06)
+    const matGreenSheer = new THREE.MeshStandardMaterial({ color: 0xA3E635, transparent: true, opacity: 0.55, roughness: 0.85 });
+    createBox(1.10, 1.45, 0.03, matGreenSheer, 0, 0, 0.05, sdbExtWin, false);
+    createBox(0.20, WALL_H, 0.60, matWallWhite, -4.90, WALL_H / 2, 1.90, wallWestWing);
+
+    // 3. Cloison de séparation entre Salle d'Eau et WC (Z = +2.20)
+    createBox(2.00, WALL_H, 0.12, matWallWhite, -3.85, WALL_H / 2, 2.20, wallWestWing);
+
+    // 4. Mur extérieur Ouest des WC (X = -4.90, Z de +2.20 à +3.60) — Avec sa HAUTE FENÊTRE ÉTROITE À PETITS BOIS + VOILAGE BLANC (Photo 07) !
+    createBox(0.20, WALL_H, 0.35, matWallWhite, -4.90, WALL_H / 2, 2.375, wallWestWing);
+    createBox(0.20, 0.75, 0.70, matWallWhite, -4.90, 0.375, 2.90, wallWestWing);
+    createBox(0.20, 0.55, 0.70, matWallWhite, -4.90, WALL_H - 0.275, 2.90, wallWestWing);
+    createTallPetitsBoisWindow(0.70, 1.75, 1, 5, -4.90, 1.625, 2.90, Math.PI / 2, wallWestWing, true);
+    createBox(0.20, WALL_H, 0.35, matWallWhite, -4.90, WALL_H / 2, 3.425, wallWestWing);
+
+    // 5. Mur Sud des WC (Z = +3.60)
+    createBox(2.10, WALL_H, 0.18, matWallWhite, -3.85, WALL_H / 2, 3.60, wallWestWing);
+
+    // --- EAST WALL OF LOT N° 4 (X = +4.25, Z de -4.20 à +2.45 : s'arrête au niveau du milieu du lit double de ④ !) ---
+    const wallEast = createSmartWallGroup(1, 0);
+    createBox(0.20, WALL_H, 6.65, matWallWhite, 4.25, WALL_H / 2, -0.875, wallEast);
+
+    // --- MUR SUD DE L'ENTRÉE ① À Z = +2.45 (AU NIVEAU DU MILIEU DU LIT DOUBLE !) + PORTE D'ENTRÉE PALIÈRE ---
+    const wallSouthEast = createSmartWallGroup(0, 1);
+    createBox(0.90, WALL_H, 0.20, matWallWhite, 1.95, WALL_H / 2, 2.45, wallSouthEast);
+    createBox(0.95, WALL_H, 0.20, matWallWhite, 3.775, WALL_H / 2, 2.45, wallSouthEast);
+    createBox(0.90, 0.60, 0.20, matWallWhite, 2.85, WALL_H - 0.30, 2.45, wallSouthEast);
+    const entranceDoorGroup = new THREE.Group();
+    entranceDoorGroup.position.set(2.42, 0, 2.40);
+    entranceDoorGroup.rotation.y = 0.45;
+    createBox(0.86, 2.42, 0.06, matHoneyWood, 0.43, 1.21, 0, entranceDoorGroup);
+    wallSouthEast.add(entranceDoorGroup);
+
+    // DÉCROCHÉ EN L : CAGE D'ESCALIER CENTRALE À COLOMBAGES SOUS L'ENTRÉE ① (Z de +2.45 à +4.10, X de +1.50 à +4.25)
+    createBox(2.65, WALL_H * 0.42, 1.55, new THREE.MeshStandardMaterial({ color: 0xEAE2D3, roughness: 0.85 }), 2.88, (WALL_H * 0.42) / 2, 3.28, wallSouthEast);
+
+    // --- CENTRAL SPINE WALL ENTRE SÉJOUR ③ ET CUISINE ② (X = +1.50, Z de -4.20 à -1.00) :
+    //     Frigo au Nord (-3.35), Porte vitrée 2<->3 au milieu (-2.25), Cuisinière au Sud (-1.45) ---
+    createBox(0.14, WALL_H, 1.55, matWallWhite, 1.50, WALL_H / 2, -3.425, apartmentGroup);
+    createBox(0.14, 0.55, 0.90, matWallWhite, 1.50, WALL_H - 0.275, -2.20, apartmentGroup);
+    createBox(0.14, WALL_H, 0.75, matWallWhite, 1.50, WALL_H / 2, -1.375, apartmentGroup);
+    // Imposte vitrée à petits bois en haut de la cloison Cuisine / Séjour (au-dessus du frigo Indesit)
+    createTallPetitsBoisWindow(1.05, 0.58, 3, 2, 1.50, 2.48, -3.35, Math.PI / 2, apartmentGroup);
+
+    // --- CLOISON ENTRE ENTRÉE ① ET CHAMBRE ④ (X = +1.50, Z de -1.00 à +4.10) :
+    //     - Mur plein de Z = -1.00 à +1.60 (derrière le petit lit bordeaux de ① et la commode bois de ④ !)
+    //     - Porte 1 <-> 4 + Rideau vert émeraude de Z = +1.60 à +2.40 (tout de suite à gauche en entrant dans ① !)
+    //     - Mur Est du décroché en L de la Chambre ④ de Z = +2.40 à +4.10 (derrière la tête du lit double bleu !) ---
+    createBox(0.14, WALL_H, 2.60, matWallWhite, 1.50, WALL_H / 2, 0.30, apartmentGroup);
+    createBox(0.14, 0.55, 0.80, matWallWhite, 1.50, WALL_H - 0.275, 2.00, apartmentGroup);
+    createBox(0.14, WALL_H, 1.70, matWallWhite, 1.50, WALL_H / 2, 3.25, apartmentGroup);
+    // Rideau vert émeraude sur la Porte 1 <-> 4 (tout de suite à gauche en entrant dans ① !)
+    const greenCurtain14 = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.14, 0.16, 2.48, 14),
+      new THREE.MeshStandardMaterial({ color: 0x0D9488, roughness: 0.75 })
+    );
+    greenCurtain14.position.set(1.58, 1.25, 1.68);
+    apartmentGroup.add(greenCurtain14);
+
+    // --- PARTITION WALL BETWEEN SÉJOUR AND PIÈCE VERTE (Z = 0.00, X from -2.80 to +1.50) ---
+    createBox(1.20, WALL_H, 0.14, matWallWhite, -2.20, WALL_H / 2, 0.00, apartmentGroup);
+    createBox(1.20, WALL_H, 0.14, matWallWhite, 0.90, WALL_H / 2, 0.00, apartmentGroup);
+    createBox(1.90, 0.53, 0.14, matWallWhite, -0.65, WALL_H - 0.265, 0.00, apartmentGroup);
+
+    function createTallGlassDoorLeaf(w, h, x, z, rotY, dir = 1) {
+      const leaf = new THREE.Group();
+      leaf.position.set(x, 0, z);
+      leaf.rotation.y = rotY;
+      const cx = dir * (w / 2);
+      createBox(w, 0.20, 0.05, matWhiteWood, cx, 0.10, 0, leaf);
+      createBox(w, 0.08, 0.05, matWhiteWood, cx, h - 0.04, 0, leaf);
+      createBox(0.06, h, 0.05, matWhiteWood, dir * 0.03, h / 2, 0, leaf);
+      createBox(0.06, h, 0.05, matWhiteWood, dir * (w - 0.03), h / 2, 0, leaf);
+      createBox(w - 0.10, h - 0.26, 0.015, matGlass, cx, h / 2 + 0.02, 0, leaf, false);
+      createBox(0.028, h - 0.26, 0.04, matWhiteWood, cx, h / 2 + 0.02, 0, leaf);
+      for (let r = 1; r < 6; r++) {
+        createBox(w - 0.10, 0.026, 0.04, matWhiteWood, cx, 0.20 + r * ((h - 0.28) / 6), 0, leaf);
+      }
+      apartmentGroup.add(leaf);
+    }
+    createTallGlassDoorLeaf(0.92, 2.52, -1.58, -0.02, 0.35, 1);
+    createTallGlassDoorLeaf(0.92, 2.52, 0.28, -0.02, -0.35, -1);
+
+    // --- PARTITION WALL BETWEEN CUISINE ② AND ENTRÉE ① (Z = -1.00, X from +1.50 to +4.25 — DÉCALÉE VERS LA MER !) ---
+    createBox(0.90, WALL_H, 0.12, matWallWhite, 1.95, WALL_H / 2, -1.00, apartmentGroup);
+    createBox(0.90, WALL_H, 0.12, matWallWhite, 3.80, WALL_H / 2, -1.00, apartmentGroup);
+    createBox(0.95, 0.55, 0.12, matWallWhite, 2.875, WALL_H - 0.275, -1.00, apartmentGroup);
+    createTallGlassDoorLeaf(0.92, 2.48, 3.33, -0.98, -0.45, -1); // Porte vitrée 1 -> 2 ouverte vers la droite (Photo 04)
+
+    // --- PARTITION WALL BETWEEN CHAMBRE ④ AND SALLE D'EAU ⑤ / COULOIR ⑥ (X = -2.80, Z from 0.00 to +4.10) ---
+    createBox(0.14, WALL_H, 0.90, matWallEmerald, -2.80, WALL_H / 2, 0.45, apartmentGroup);
+    createBox(0.14, 0.58, 0.85, matWallEmerald, -2.80, WALL_H - 0.29, 1.325, apartmentGroup);
+    createBox(0.14, WALL_H, 0.95, matWallEmerald, -2.80, WALL_H / 2, 2.225, apartmentGroup);
+    createBox(0.14, 0.58, 0.80, matWallEmerald, -2.80, WALL_H - 0.29, 3.10, apartmentGroup);
+    createBox(0.14, WALL_H, 0.60, matWallEmerald, -2.80, WALL_H / 2, 3.80, apartmentGroup);
+
+    const verteNorthCoatL = createBox(1.18, WALL_H - 0.12, 0.03, matWallEmerald, -2.20, WALL_H / 2 + 0.04, 0.09, apartmentGroup, false);
+    const verteNorthCoatR = createBox(1.18, WALL_H - 0.12, 0.03, matWallEmerald, 0.90, WALL_H / 2 + 0.04, 0.09, apartmentGroup, false);
+    const verteEastCoat = createBox(0.03, WALL_H - 0.12, 3.90, matWallEmerald, 1.42, WALL_H / 2 + 0.04, 2.00, apartmentGroup, false);
+
+    // Papier peint Fleurs 70s dans l'Entrée ① (de Z = -1.00 à +2.45)
+    const fleursCoatEast = createBox(0.03, WALL_H - 0.12, 3.35, matWallFloral, 4.13, WALL_H / 2 + 0.04, 0.72, apartmentGroup, false);
+    const fleursCoatWest = createBox(0.03, WALL_H - 0.12, 2.50, matWallFloral, 1.58, WALL_H / 2 + 0.04, 0.30, apartmentGroup, false);
+    const fleursCoatSouth = createBox(2.60, WALL_H - 0.12, 0.03, matWallFloral, 2.875, WALL_H / 2 + 0.04, 2.34, apartmentGroup, false);
+
+    // --- WALL BETWEEN PIÈCE VERTE AND LOGGIA SUD (Z = +4.10, X from -2.80 to +1.50 — Validé v11) ---
+    // Moitié droite (X de -0.10 à +1.50, derrière le lit double Nord-Sud) = MUR PLEIN FERMÉ avec colombages normands & rideau vert côté Loggia !
+    // Moitié centre-gauche (X de -2.10 à -0.10) = Porte-fenêtre verrière blanche 3 pans ouvrant sur la Loggia !
+    createBox(0.70, WALL_H, 0.20, matWallWhite, -2.45, WALL_H / 2, 4.10, apartmentGroup);
+    createBox(1.60, WALL_H, 0.20, matWallWhite, 0.70, WALL_H / 2, 4.10, apartmentGroup); // Mur Sud plein derrière le lit double !
+    createBox(2.00, 0.53, 0.20, matWallWhite, -1.10, WALL_H - 0.265, 4.10, apartmentGroup);
+    const verteSouthCoatL = createBox(0.68, WALL_H - 0.12, 0.03, matWallEmerald, -2.45, WALL_H / 2 + 0.04, 3.98, apartmentGroup, false);
+    const verteSouthCoatR = createBox(1.58, WALL_H - 0.12, 0.03, matWallEmerald, 0.70, WALL_H / 2 + 0.04, 3.98, apartmentGroup, false);
+    createTallGlassDoorLeaf(0.96, 2.52, -2.08, 4.08, -0.35, 1);
+    createTallGlassDoorLeaf(0.96, 2.52, -0.12, 4.08, 0.35, -1);
+
+    // Colombages normands en bois sombre sur le mur fermé côté Loggia (X de +0.10 à +1.45, Z = +4.22) + Rideau vert plissé à droite de la verrière
+    [0.22, 0.58, 0.94, 1.32].forEach(cx => {
+      createBox(0.07, WALL_H - 0.15, 0.06, matDarkTimber, cx, WALL_H / 2, 4.22, apartmentGroup, false);
+    });
+    const diagTimber = createBox(0.07, 1.65, 0.06, matDarkTimber, 0.76, 1.85, 4.22, apartmentGroup, false);
+    diagTimber.rotation.z = 0.52;
+    const loggiaGreenCurtain = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.14, 0.16, 2.50, 14),
+      new THREE.MeshStandardMaterial({ color: 0x3F6212, roughness: 0.8 })
+    );
+    loggiaGreenCurtain.position.set(0.05, 1.26, 4.26);
+    apartmentGroup.add(loggiaGreenCurtain);
+
+    // --- LOGGIA COUVERTE SUD ("TERRASSE SUR CAMPAGNE", Photo 08 : Z de +4.10 à +6.80, X de -2.80 à +1.50) ---
+    const loggiaGroup = createSmartWallGroup(0, 1);
+    createBox(0.18, WALL_H, 0.80, matWallWhite, -2.80, WALL_H / 2, 4.50, loggiaGroup);
+    createBox(0.18, 0.85, 1.15, matWallWhite, -2.80, 0.425, 5.475, loggiaGroup);
+    createBox(0.18, 0.40, 1.15, matWallWhite, -2.80, WALL_H - 0.20, 5.475, loggiaGroup);
+    createTallPetitsBoisWindow(1.15, 1.80, 2, 3, -2.80, 1.75, 5.475, Math.PI / 2, loggiaGroup); // Fenêtre droite de la Photo 08
+    createBox(0.18, WALL_H, 0.75, matWallWhite, -2.80, WALL_H / 2, 6.425, loggiaGroup);
+
+    createBox(0.18, WALL_H, 2.70, matWallWhite, 1.50, WALL_H / 2, 5.45, loggiaGroup);
+    createBox(0.54, 2.48, 1.05, matWhiteWood, 1.16, 1.24, 5.85, loggiaGroup); // Grande Armoire blanche contre le mur Est du balcon
+    // Étendoir à linge blanc en 3D posé devant les colombages du mur Sud fermé + trotteur enfant devant l'armoire
+    createBox(0.75, 0.92, 0.42, matWhiteWood, 0.62, 0.46, 4.62, loggiaGroup);
+    createBox(0.42, 0.42, 0.48, new THREE.MeshStandardMaterial({ color: 0x38BDF8, roughness: 0.5 }), 0.72, 0.21, 6.22, loggiaGroup);
+    // Petit vélo / draisienne verte d'enfant à droite (Ouest) sous la fenêtre intérieure de la Loggia (Photo 07)
+    createBox(0.32, 0.52, 0.82, new THREE.MeshStandardMaterial({ color: 0x22C55E, roughness: 0.4 }), -2.48, 0.26, 5.55, loggiaGroup);
+    createBox(4.48, 0.10, 0.14, matDarkTimber, -0.65, 1.02, 6.76, loggiaGroup);
+    createBox(4.48, 0.08, 0.12, matDarkTimber, -0.65, 0.12, 6.76, loggiaGroup);
+    [-2.80, -1.72, -0.65, 0.42, 1.50].forEach(px => {
+      createBox(0.14, WALL_H, 0.14, matDarkTimber, px, WALL_H / 2, 6.76, loggiaGroup);
+    });
+    for (let bx = -2.62; bx <= 1.35; bx += 0.16) {
+      createBox(0.04, 0.86, 0.04, matDarkTimber, bx, 0.55, 6.76, loggiaGroup, false);
+    }
+    createBox(4.25, 0.18, 0.22, new THREE.MeshStandardMaterial({ color: 0xDC2626, roughness: 0.6 }), -0.65, WALL_H - 0.12, 6.82, loggiaGroup);
+
+    // =========================================================================
+    // 4. MOBILIER GALBÉ NON-CUBIQUE CALÉ AU MILLIMÈTRE SUR LES 8 PHOTOS (01 À 08)
+    // =========================================================================
+
+    // --- A. SALLE DE SÉJOUR VUE MER (Photos 01 & 02) ---
+    // 1. Cheminée coffrée blanche sur le MUR DE GAUCHE (OUEST, X = -2.68) + Grand Miroir + 2 Placards bois miel
+    const fireplaceGroup = new THREE.Group();
+    fireplaceGroup.position.set(-2.68, 0, -2.10);
+    fireplaceGroup.rotation.y = Math.PI;
+    createBox(0.38, 1.22, 1.35, matWhiteWood, -0.19, 0.61, 0, fireplaceGroup);
+    createBox(0.44, 0.08, 1.45, matWhiteWood, -0.22, 1.25, 0, fireplaceGroup);
+    createBox(0.22, 1.65, 1.12, matWhiteWood, -0.11, 2.12, 0, fireplaceGroup);
+    createBox(0.04, 1.15, 0.82, matWhiteWood, -0.24, 1.92, 0, fireplaceGroup);
+    createBox(0.05, 1.05, 0.72, matMirror, -0.245, 1.92, 0, fireplaceGroup, false);
+    [-1.35, 1.35].forEach(cz => {
+      // Meuble bas + placard haut en bois miel de part et d'autre de la cheminée
+      createBox(0.40, 0.78, 1.08, matHoneyWood, -0.20, 0.39, cz, fireplaceGroup);
+      createBox(0.32, 0.85, 0.90, matHoneyWood, -0.16, 1.55, cz, fireplaceGroup);
+    });
+    // Coffre à jouets blanc "ABCDEF..." avec renard devant l'âtre (Photos 01 & 02)
+    createBox(0.36, 0.38, 0.62, matWhiteWood, -0.45, 0.19, -0.05, fireplaceGroup);
+    // Petite chaise enfant en bois foncé à droite du coffre (Photo 02)
+    createBox(0.26, 0.26, 0.26, matDarkTimber, -0.45, 0.13, 0.45, fireplaceGroup);
+    createBox(0.04, 0.52, 0.26, matDarkTimber, -0.34, 0.26, 0.45, fireplaceGroup);
+    apartmentGroup.add(fireplaceGroup);
+
+    // 2. Table en bois massif + Long banc en bois devant la triple fenêtre mer (Photo 01)
+    const diningGroup = new THREE.Group();
+    diningGroup.position.set(-0.65, 0, -3.20);
+    createBox(1.75, 0.06, 0.88, matLightOak, 0, 0.75, 0, diningGroup);
+    [[-0.76, -0.36], [0.76, -0.36], [-0.76, 0.36], [0.76, 0.36]].forEach(([lx, lz]) => {
+      const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.03, 0.73, 14), matLightOak);
+      leg.position.set(lx, 0.365, lz);
+      diningGroup.add(leg);
+    });
+    // Long banc en bois côté séjour + banc côté fenêtre (Photo 01)
+    createBox(1.65, 0.05, 0.34, matHoneyWood, 0, 0.45, 0.62, diningGroup);
+    createBox(1.65, 0.05, 0.34, matHoneyWood, 0, 0.45, -0.62, diningGroup);
+    [[-0.68, 0.62], [0.68, 0.62], [-0.68, -0.62], [0.68, -0.62]].forEach(([bx, bz]) => {
+      createBox(0.06, 0.44, 0.30, matHoneyWood, bx, 0.22, bz, diningGroup);
+    });
+    // Chaise blanche à accoudoirs au bout droit de la table (Photo 01)
+    createBox(0.46, 0.05, 0.46, matWhiteWood, 1.08, 0.45, 0, diningGroup);
+    createBox(0.05, 0.46, 0.46, matWhiteWood, 1.28, 0.68, 0, diningGroup);
+    apartmentGroup.add(diningGroup);
+
+    // 3. Tapis vagues bleues posé DANS LA LONGUEUR NORD-SUD (Bleu marine foncé au Nord côté table/mer -> Crème au Sud côté Chambre !)
+    const waveRug = new THREE.Mesh(
+      new THREE.PlaneGeometry(1.65, 2.40),
+      new THREE.MeshStandardMaterial({ map: texRealWaveRug, roughness: 0.9 })
+    );
+    waveRug.rotation.x = -Math.PI / 2;
+    waveRug.position.set(-0.65, 0.01, -1.35);
+    apartmentGroup.add(waveRug);
+
+    // 4. Banquette à DROITE (côté Est, X = +0.92, Z = -1.15) avec boutis fleuri vert sauge + plaid vert anis côté Sud + coussin bleu marine
+    const sofaGroup = new THREE.Group();
+    sofaGroup.position.set(0.92, 0, -1.15);
+    sofaGroup.rotation.y = Math.PI;
+    createBox(0.88, 0.42, 1.75, matSofaCloth, 0, 0.21, 0, sofaGroup);
+    // Plaid vert anis sur la partie Sud de la banquette (Photos 01 & 02)
+    createBox(0.90, 0.06, 0.65, new THREE.MeshStandardMaterial({ color: 0xA3E635, roughness: 0.75 }), 0, 0.44, -0.52, sofaGroup);
+    const sofaBack = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.18, 1.72, 16), matSofaCloth);
+    sofaBack.rotation.x = Math.PI / 2;
+    sofaBack.position.set(-0.30, 0.58, 0);
+    sofaGroup.add(sofaBack);
+    [-0.45, 0.35].forEach((cz, idx) => {
+      const cushCol = idx === 0 ? 0x1E3A8A : 0x4A7C59;
+      const cush = new THREE.Mesh(new THREE.SphereGeometry(0.20, 16, 12), new THREE.MeshStandardMaterial({ color: cushCol, roughness: 0.85 }));
+      cush.scale.set(0.65, 0.85, 1.0);
+      cush.position.set(-0.06, 0.54, cz);
+      sofaGroup.add(cush);
+    });
+    apartmentGroup.add(sofaGroup);
+    // Porte vitrée à petits carreaux communicante Salon ③ <-> Cuisine ② (à Z = -2.20, X = +1.48)
+    createTallGlassDoorLeaf(0.84, 2.48, 1.48, -2.55, -1.15, -1);
+
+    // 5. Suspension fleur en rotin au plafond (Photos 01 & 02)
+    const lampGroup = new THREE.Group();
+    lampGroup.position.set(-0.60, 2.62, -1.80);
+    for (let p = 0; p < 8; p++) {
+      const petal = new THREE.Mesh(new THREE.TorusGeometry(0.24, 0.016, 8, 20), matRattan);
+      petal.rotation.x = Math.PI / 2;
+      petal.rotation.z = (p * Math.PI) / 4;
+      petal.position.set(Math.cos((p * Math.PI) / 4) * 0.15, 0, Math.sin((p * Math.PI) / 4) * 0.15);
+      lampGroup.add(petal);
+    }
+    apartmentGroup.add(lampGroup);
+
+    // --- B. CUISINE VUE MER ② (~7,5 m² — Cotes Lepeltier : Fenêtre 1,795 m × 1,665 m) ---
+    // - À GAUCHE (mur Ouest X = +1.50) : Grand Frigo blanc Indesit au Nord (Z = -3.35), Passage 2<->3 au milieu (Z = -2.20), Cuisinière + hotte au Sud (Z = -1.40) !
+    // - AU FOND & À DROITE (mur Est X = +3.85) : Plan en L carrelé marron + Micro-ondes dans l'angle + Évier double bac orange 70s !
+    const kitchenGroup = new THREE.Group();
+    apartmentGroup.add(kitchenGroup);
+
+    createBox(0.68, 1.78, 0.68, matWhiteWood, 1.92, 0.89, -3.35, kitchenGroup); // Frigo Indesit en haut à gauche !
+    createBox(0.64, 0.88, 0.64, matWhiteWood, 1.92, 0.44, -1.42, kitchenGroup); // Cuisinière en bas à gauche !
+
+    createBox(2.20, 0.86, 0.60, matWhiteWood, 2.95, 0.43, -3.82, kitchenGroup);
+    const kitchenCounterN = createBox(2.24, 0.06, 0.64, matKitchenCounter, 2.95, 0.89, -3.82, kitchenGroup);
+    createBox(0.48, 0.30, 0.38, matWhiteWood, 3.72, 1.07, -3.76, kitchenGroup); // Micro-ondes dans l'angle droit !
+
+    createBox(0.62, 0.86, 2.45, matWhiteWood, 3.85, 0.43, -2.55, kitchenGroup);
+    const kitchenCounterW = createBox(0.66, 0.06, 2.49, matKitchenCounter, 3.85, 0.89, -2.55, kitchenGroup);
+    const kitchenBacksplash = createBox(0.04, 0.65, 2.45, matKitchenCounter, 4.13, 1.24, -2.55, kitchenGroup);
+    createBox(0.52, 0.08, 1.05, matKitchenSink, 3.84, 0.92, -2.15, kitchenGroup);
+    const faucet = new THREE.Mesh(new THREE.TorusGeometry(0.11, 0.016, 10, 18, Math.PI), new THREE.MeshStandardMaterial({ color: 0xE2E8F0, metalness: 0.9, roughness: 0.15 }));
+    faucet.position.set(4.02, 1.04, -2.15);
+    faucet.rotation.y = -Math.PI / 2;
+    kitchenGroup.add(faucet);
+
+    // --- C. CHAMBRE VERT CANARD ④ (~13,5 m² — Photos 05 & 06 — Validé v11) ---
+    // - En haut à droite (Est, Z = +0.55) : Commode en bois
+    // - Au milieu à droite (Est, Z = +2.00) : Porte 1 <-> 4 (rideau vert) venant de l'Entrée ①
+    // - En bas à droite (Sud-Est, orienté NORD-SUD contre le mur Sud fermé !) : Lit double 150×195 à couette bleu ciel + 2 oreillers bleu roi au Sud + chevet blanc à gauche !
+    createBox(0.46, 0.84, 0.92, matDarkTimber, 1.15, 0.42, 0.62, apartmentGroup); // Commode bois en haut à droite
+    const bedGroup = new THREE.Group();
+    bedGroup.position.set(0.68, 0, 2.98);
+    createBox(1.48, 0.46, 1.92, matWhiteWood, 0, 0.23, 0, bedGroup);
+    const bedspreadMat = new THREE.MeshStandardMaterial({ color: 0x63B3ED, roughness: 0.82 });
+    createBox(1.50, 0.16, 1.86, bedspreadMat, 0, 0.48, -0.02, bedGroup);
+    [-0.36, 0.36].forEach(px => {
+      const pillow = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.15, 0.56, 14), matRoyalBlue);
+      pillow.rotation.z = Math.PI / 2;
+      pillow.position.set(px, 0.60, 0.72); // Oreillers au Sud contre la cloison Sud fermée !
+      bedGroup.add(pillow);
+    });
+    apartmentGroup.add(bedGroup);
+    // Table de chevet blanche à gauche du lit contre la cloison Sud
+    createBox(0.42, 0.52, 0.38, matWhiteWood, -0.26, 0.26, 3.76, apartmentGroup);
+
+    // Tapis persan bleu ciel à médaillon central + Table basse ronde en rotin au centre de la Chambre ④
+    const persianRug = new THREE.Mesh(
+      new THREE.PlaneGeometry(1.95, 2.45),
+      new THREE.MeshStandardMaterial({ map: texRealPersianRug, roughness: 0.9 })
+    );
+    persianRug.rotation.x = -Math.PI / 2;
+    persianRug.position.set(-1.15, 0.01, 2.15);
+    apartmentGroup.add(persianRug);
+
+    const rattanTable = new THREE.Group();
+    rattanTable.position.set(-1.15, 0, 2.05);
+    const rtTop = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.42, 0.05, 24), matRattan);
+    rtTop.position.y = 0.48;
+    rattanTable.add(rtTop);
+    const rtBase = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.34, 0.46, 16, 1, true), matRattan);
+    rtBase.position.y = 0.23;
+    rattanTable.add(rtBase);
+    apartmentGroup.add(rattanTable);
+
+    // 2 Fauteuils en rotin (un près de la commode Nord-Est, un au Sud-Ouest)
+    [[0.85, 1.32, -0.8], [-2.15, 3.55, 2.4]].forEach(([ax, az, rot]) => {
+      const chair = new THREE.Group();
+      chair.position.set(ax, 0, az);
+      chair.rotation.y = rot;
+      const seat = new THREE.Mesh(new THREE.CylinderGeometry(0.34, 0.30, 0.38, 18), matRattan);
+      seat.position.y = 0.19;
+      chair.add(seat);
+      const back = new THREE.Mesh(new THREE.TorusGeometry(0.32, 0.06, 12, 24, Math.PI * 1.15), matRattan);
+      back.rotation.x = Math.PI / 2;
+      back.rotation.z = Math.PI * 0.92;
+      back.position.y = 0.62;
+      chair.add(back);
+      apartmentGroup.add(chair);
+    });
+
+    // Coffre en osier tressé + Étagère en rotin + TV sur meuble verre contre le mur Ouest de la Chambre ④
+    createBox(0.46, 0.52, 0.78, matRattan, -2.42, 0.26, 2.25, apartmentGroup);
+    createBox(0.36, 0.92, 0.68, matRattan, -2.46, 0.46, 1.35, apartmentGroup);
+    const tvGroup = new THREE.Group();
+    tvGroup.position.set(-2.12, 0, 0.38);
+    createBox(0.82, 0.48, 0.40, matGlass, 0, 0.24, 0, tvGroup);
+    createBox(0.76, 0.46, 0.06, new THREE.MeshStandardMaterial({ color: 0x0F172A, roughness: 0.25 }), 0, 0.72, 0, tvGroup);
+    apartmentGroup.add(tvGroup);
+
+    // --- D. ENTRÉE FLEURIE ① (~6,5 m² — DÉCALÉE VERS LA MER : Photo 04) ---
+    // - En bas (Z = +2.45) : Porte d'Entrée palière
+    // - Tout de suite à gauche en entrant (X = +1.55, Z = +1.70..+2.35) : Porte 1 <-> 4 (rideau vert émeraude)
+    // - APRÈS la porte 1<->4 en allant vers la Cuisine ② (Z = -0.85..+1.15) : Petit lit bordeaux + tabouret coussin violet + étagère 3 cases !
+    // - À droite (Est, X = +3.82) : Commode blanche 3 tiroirs + sac turquoise avec ballon de volley !
+    const singleBed = new THREE.Group();
+    singleBed.position.set(2.02, 0, 0.12);
+    createBox(0.88, 0.45, 1.82, new THREE.MeshStandardMaterial({ color: 0x702040, roughness: 0.82 }), 0, 0.225, 0, singleBed);
+    apartmentGroup.add(singleBed);
+    // Étagère murale blanche à 3 cases au-dessus du petit lit bordeaux
+    createBox(0.24, 0.34, 1.05, matWhiteWood, 1.72, 1.28, 0.12, apartmentGroup);
+    // Tabouret avec coussin violet juste devant le lit bordeaux (après le rideau vert)
+    createBox(0.38, 0.42, 0.38, new THREE.MeshStandardMaterial({ color: 0x9333EA, roughness: 0.8 }), 1.98, 0.21, 1.28, apartmentGroup);
+
+    // Commode blanche 3 tiroirs à DROITE contre le mur Est de l'Entrée ①
+    createBox(0.48, 0.88, 1.15, matWhiteWood, 3.82, 0.44, 0.25, apartmentGroup);
+    // Sac turquoise + Ballon de beach-volley au pied de la commode
+    createBox(0.36, 0.32, 0.36, new THREE.MeshStandardMaterial({ color: 0x2DD4BF, roughness: 0.7 }), 3.82, 0.16, 1.18, apartmentGroup);
+    const volleyBall = new THREE.Mesh(new THREE.SphereGeometry(0.14, 16, 16), new THREE.MeshStandardMaterial({ color: 0xFACC15, roughness: 0.4 }));
+    volleyBall.position.set(3.82, 0.34, 1.18);
+    apartmentGroup.add(volleyBall);
+
+    // --- E. AILE OUEST : SALLE DE BAIN ⑤ (~3,2 m²) & PETIT COULOIR + WC ⑥ (~1,8 m²) ---
+    createBox(0.62, 0.86, 0.62, matWhiteWood, -4.45, 0.43, 0.35, apartmentGroup);
+    const cumulusMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.28, 1.15, 20), matWhiteWood);
+    cumulusMesh.position.set(-4.45, 1.72, 0.32);
+    cumulusMesh.castShadow = true;
+    apartmentGroup.add(cumulusMesh);
+
+    const sinkCol = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.14, 0.80, 16), matWhiteWood);
+    sinkCol.position.set(-3.82, 0.40, 0.28);
+    apartmentGroup.add(sinkCol);
+    const sinkBasin = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.18, 0.16, 20), matWhiteWood);
+    sinkBasin.position.set(-3.82, 0.84, 0.28);
+    apartmentGroup.add(sinkBasin);
+    createBox(0.56, 0.62, 0.04, matMirror, -3.82, 1.48, 0.04, apartmentGroup, false);
+    const laundryBasket = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.16, 0.52, 16), matWhiteWood);
+    laundryBasket.position.set(-3.45, 0.26, 0.32);
+    apartmentGroup.add(laundryBasket);
+
+    createBox(0.88, 2.10, 0.88, matGlass, -3.12, 1.05, 0.48, apartmentGroup);
+    createBox(0.90, 0.12, 0.90, matWhiteWood, -3.12, 0.06, 0.48, apartmentGroup);
+    createBox(0.36, 0.82, 0.65, matWhiteWood, -3.05, 0.41, 1.45, apartmentGroup);
+
+    createBox(0.48, 0.82, 1.15, matWhiteWood, -4.55, 0.41, 1.28, apartmentGroup);
+    const bathMat = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.45, 0.02, 24), new THREE.MeshStandardMaterial({ color: 0xFEFCE8, roughness: 0.95 }));
+    bathMat.position.set(-3.85, 0.01, 1.15);
+    apartmentGroup.add(bathMat);
+
+    const wcBowl = new THREE.Mesh(new THREE.CylinderGeometry(0.21, 0.17, 0.43, 16), matWhiteWood);
+    wcBowl.position.set(-4.15, 0.215, 2.75);
+    apartmentGroup.add(wcBowl);
+    createBox(0.24, 0.44, 0.40, matWhiteWood, -4.38, 0.64, 2.75, apartmentGroup);
+    const fontePipe = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.085, 0.085, WALL_H, 16),
+      new THREE.MeshStandardMaterial({ color: 0xFFFFFF, roughness: 0.35 })
+    );
+    fontePipe.position.set(-4.65, WALL_H / 2, 2.40);
+    apartmentGroup.add(fontePipe);
+    createBox(0.24, 0.72, 0.24, new THREE.MeshStandardMaterial({ color: 0xF4D6DC, roughness: 0.6 }), -4.65, 0.36, 3.25, apartmentGroup);
+
+    // --- F. LOGGIA COUVERTE SUD ⑦ (12,0 m² AU SOL : Table blanche + 3 sièges à coussins gris-bleu ardoise) ---
+    const loggiaTableGroup = new THREE.Group();
+    loggiaTableGroup.position.set(-0.65, 0, 5.45);
+    createBox(1.28, 0.05, 0.86, matWhiteWood, 0, 0.74, 0, loggiaTableGroup);
+    [[-0.56, -0.36], [0.56, -0.36], [-0.56, 0.36], [0.56, 0.36]].forEach(([lx, lz]) => {
+      createBox(0.05, 0.74, 0.05, matWhiteWood, lx, 0.37, lz, loggiaTableGroup);
+    });
+    // 3 Fauteuils blancs avec coussins gris-bleu ardoise (Gauche, Centre-Sud, Droite — comme sur la Photo 07)
+    [[0, 0.78, Math.PI], [-0.88, 0, Math.PI / 2], [0.88, 0, -Math.PI / 2]].forEach(([cx, cz, rot]) => {
+      const gc = new THREE.Group();
+      gc.position.set(cx, 0, cz);
+      gc.rotation.y = rot;
+      createBox(0.50, 0.05, 0.50, matWhiteWood, 0, 0.44, 0, gc);
+      createBox(0.42, 0.06, 0.42, new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.8 }), 0, 0.48, 0, gc, false);
+      createBox(0.50, 0.44, 0.05, matWhiteWood, 0, 0.66, -0.22, gc);
+      loggiaTableGroup.add(gc);
+    });
+    apartmentGroup.add(loggiaTableGroup);
+
+    // --- 5. ARCHITECTURE EXTÉRIEURE PERMANENTE DE L'IMMEUBLE « LA HUCHETTE » (AILE EST À COLOMBAGES + TOURELLE OUEST) & TOITURE 2e ÉTAGE ACTIVABLE ---
+    // Aile Est de l'immeuble (à droite de notre appartement, X de +5.25 à +7.80) avec son grand pignon normand à colombages et son toit en tuiles brunes
+    const eastWingGroup = new THREE.Group();
+    createBox(2.55, RDC_H + WALL_H + 1.80, 8.40, normanCreamMat, 6.55, (-RDC_H + WALL_H + 1.80) / 2, -0.20, eastWingGroup, false);
+    // Colombages verticaux sur le pignon Est/Sud et Nord
+    for (let cx = 5.45; cx <= 7.65; cx += 0.44) {
+      createBox(0.08, WALL_H + 1.80, 0.08, matDarkTimber, cx, (WALL_H + 1.80) / 2, 4.02, eastWingGroup, false);
+      createBox(0.08, WALL_H + 1.80, 0.08, matDarkTimber, cx, (WALL_H + 1.80) / 2, -4.42, eastWingGroup, false);
+    }
+    // Toit pointu normand sur l'aile Est
+    const eastGableRoof = new THREE.Mesh(new THREE.ConeGeometry(2.15, 2.60, 4), normanRoofMat);
+    eastGableRoof.position.set(6.55, WALL_H + 3.10, -0.20);
+    eastGableRoof.rotation.y = Math.PI / 4;
+    eastGableRoof.scale.set(1.0, 1.0, 2.8);
+    eastWingGroup.add(eastGableRoof);
+    // Tourelle normande pointue à l'Ouest (à gauche du Salon, X = -4.25, Z = -2.40)
+    createBox(1.85, RDC_H + WALL_H + 1.60, 1.85, normanCreamMat, -4.35, (-RDC_H + WALL_H + 1.60) / 2, -2.20, eastWingGroup, false);
+    const westTurretCone = new THREE.Mesh(new THREE.ConeGeometry(1.55, 2.85, 4), normanRoofMat);
+    westTurretCone.position.set(-4.35, WALL_H + 3.00, -2.20);
+    westTurretCone.rotation.y = Math.PI / 4;
+    eastWingGroup.add(westTurretCone);
+    envGroup.add(eastWingGroup);
+
+    const roofGroup = new THREE.Group();
+    const roofTileMat = new THREE.MeshStandardMaterial({ color: 0x693E2A, roughness: 0.75, transparent: true, opacity: 0.90 });
+    createBox(8.6, 2.40, 8.2, new THREE.MeshStandardMaterial({ color: 0xF5EFE0, roughness: 0.85, transparent: true, opacity: 0.88 }), 0.5, WALL_H + 1.20, 0.2, roofGroup);
+    // Tourelle pointue normande à l'angle Sud-Ouest
+    const turretRoof = new THREE.Mesh(new THREE.ConeGeometry(1.65, 2.60, 4), roofTileMat);
+    turretRoof.position.set(-2.2, WALL_H + 3.45, 2.8);
+    turretRoof.rotation.y = Math.PI / 4;
+    roofGroup.add(turretRoof);
+    // Toit bac acier 15 m² sur l'aile Ouest (SDB/WC)
+    const steelRoofMat = new THREE.MeshStandardMaterial({
+      color: 0x475569,
+      metalness: 0.6,
+      roughness: 0.4,
+      transparent: true,
+      opacity: 0.82
+    });
+    const steelRoof = createBox(2.35, 0.12, 3.90, steelRoofMat, -3.85, WALL_H + 0.18, 1.75, roofGroup);
+    steelRoof.rotation.z = 0.12;
+    roofGroup.visible = false;
+    apartmentGroup.add(roofGroup);
+
+    // =========================================================================
+    // 6. STATE SWITCHER : ACTUEL 1970 vs PROJET RÉNOVÉ CONTEMPORAIN
+    // =========================================================================
+    window.isRenovatedMode = false;
+    window.setRenovationMode = function(renovated) {
+      window.isRenovatedMode = !!renovated;
+      document.getElementById('btn-mode-actuel').classList.toggle('active-actuel', !renovated);
+      document.getElementById('btn-mode-renove').classList.toggle('active-renove', renovated);
+
+      matFloorPine.map = renovated ? texPineRenove : texPineActuel;
+      matFloorPine.needsUpdate = true;
+      sejourWestInner.material = renovated ? matWallWhite : matWallLeaf;
+      matRoyalBlue.color.setHex(renovated ? 0xE2DDD5 : 0x1D4ED8);
+      matSofaCloth.color.setHex(renovated ? 0xDFD9CE : 0x285E56);
+
+      matFloorKitchen.map = renovated ? texTilesKitchenRenove : texTilesBrown70s;
+      matFloorKitchen.needsUpdate = true;
+      kitchenCounterW.material = renovated ? matLightOak : matKitchenCounter;
+      kitchenCounterN.material = renovated ? matLightOak : matKitchenCounter;
+      kitchenBacksplash.material = renovated ? matFloorSdb : matKitchenCounter;
+      matKitchenSink.color.setHex(renovated ? 0xF8FAFC : 0xEA580C);
+
+      matWallEmerald.color.setHex(renovated ? 0xDCE5DF : 0x1D5B52);
+      bedspreadMat.color.setHex(renovated ? 0xE2E8F0 : 0x63B3ED);
+
+      fleursCoatEast.material = renovated ? matWallWhite : matWallFloral;
+      fleursCoatWest.material = renovated ? matWallWhite : matWallFloral;
+      fleursCoatSouth.material = renovated ? matWallWhite : matWallFloral;
+
+      cumulusMesh.scale.set(renovated ? 0.65 : 1.0, renovated ? 0.65 : 1.0, renovated ? 0.45 : 1.0);
+    };
+
+    // =========================================================================
+    // 7. FLOATING 3D ROOM LABELS (AVEC LES M² OFFICIELS DANS CHAQUE PIÈCE)
+    // =========================================================================
+    const labelsData = [
+      { title: "① Entrée Fleurie", sub: "~ 6,5 m² (Rideau vert ➔ Lit bordeaux)", pos: new THREE.Vector3(2.85, 1.45, 0.85) },
+      { title: "② Cuisine Vue Mer", sub: "~ 7,5 m² (Fenêtre 1,80×1,67m)", pos: new THREE.Vector3(2.85, 1.45, -2.60) },
+      { title: "③ Salon Vue Mer", sub: "~ 16,5 m² (Tapis vagues & Cheminée)", pos: new THREE.Vector3(-0.65, 1.45, -2.10) },
+      { title: "④ Chambre Vert Canard", sub: "~ 13,5 m² (Tapis persan & Lit double)", pos: new THREE.Vector3(-0.65, 1.45, 2.05) },
+      { title: "⑤ Salle de Bain", sub: "~ 3,2 m² (À droite du couloir)", pos: new THREE.Vector3(-3.85, 1.45, 0.95) },
+      { title: "⑥ Petit Couloir & WC", sub: "~ 1,8 m² (En face)", pos: new THREE.Vector3(-3.85, 1.45, 2.90) },
+      { title: "⑦ Loggia Couverte Sud", sub: "12,0 m² (Armoire + 3 sièges)", pos: new THREE.Vector3(-0.65, 1.45, 5.45) },
+      { title: "⑧ Cour Pavée & Voiture garée", sub: "RDC Damier + Cabines & Mer", pos: new THREE.Vector3(2.20, -1.80, -6.50), tech: true }
+    ];
+
+    const labelsContainer = document.getElementById('labels-container');
+    const labelElements = labelsData.map(item => {
+      const el = document.createElement('div');
+      el.className = 'room-label' + (item.tech ? ' tech-badge' : '');
+      el.innerHTML = `${item.title}<span class="sub">• ${item.sub}</span>`;
+      labelsContainer.appendChild(el);
+      return { el, basePos: item.pos.clone() };
+    });
+
+    // =========================================================================
+    // 8. CAMERA PRESETS, MATTERPORT FLOOR HOTSPOTS & IMMERSIVE WALK MODE (1.70 m)
+    // =========================================================================
+    const CAM_PRESETS = {
+      site_complet:   { pos: [-15.5, 16.5, 18.5], target: [0.2, 0.2, -1.0],    fov: 45, walk: false, photoIdx: 7 },
+      dollhouse:      { pos: [-10.5, 10.8, 11.5], target: [0.0, 0.8, 0.5],     fov: 45, walk: false, photoIdx: 0 },
+      rue_cour_mer:   { pos: [6.5, 5.2, -17.5],   target: [0.2, -0.5, -1.5],   fov: 48, walk: false, photoIdx: 7 },
+      sejour_mer:     { pos: [-0.65, 1.68, -0.35], target: [-0.65, 1.65, -0.60], fov: 72, walk: true,  photoIdx: 0 },
+      couloir_entree: { pos: [2.85, 1.68, 2.05],   target: [2.80, 1.65, 1.80],   fov: 72, walk: true,  photoIdx: 1 },
+      cuisine_mer:    { pos: [2.85, 1.68, -1.55],  target: [2.85, 1.65, -1.80],  fov: 72, walk: true,  photoIdx: 2 },
+      piece_verte:    { pos: [-0.65, 1.68, 1.45],  target: [-0.60, 1.64, 1.70],  fov: 72, walk: true,  photoIdx: 3 },
+      sdb_wc:         { pos: [-3.65, 1.68, 1.15],  target: [-3.85, 1.62, 0.90],  fov: 72, walk: true,  photoIdx: 4 },
+      loggia_jardin:  { pos: [-0.65, 1.68, 5.15],  target: [-0.65, 1.55, 5.40],  fov: 72, walk: true,  photoIdx: 6 },
+      top_plan:       { pos: [-0.20, 25.0, 2.20],  target: [-0.20, 0.0, -0.50],  fov: 42, walk: false, photoIdx: 0 }
+    };
+
+    // 11 Stations de Marche Immersive Photoréaliste + WebGL (100% Identique au Vrai !)
+    const WALK_STATIONS = [
+      {
+        name: "① Entrée Fleurie (~4,8 m² Carrez / 6,5 m²)",
+        shortName: "① Entrée",
+        pos: [2.85, 1.68, 2.05],
+        lookDir: [-0.15, -0.04, -1.0],
+        floorY: 0.03,
+        photoIdx: 1,
+        render3d: "renders_3d/villers_3d_01_entree_fleurie_seule.jpg",
+        realPhoto: "textures/room_entree.jpg",
+        desc: "Papier peint fleuri 70s, rideau vert à gauche vers la Chambre ④, banquette bordeaux + pouf violet, commode blanche à droite, porte vitrée au fond vers la Cuisine ②.",
+        hotspots: [
+          { x: 52, y: 46, label: "⬆️ Avancer : ② Cuisine Vue Mer", targetIdx: 1 },
+          { x: 22, y: 62, label: "⬅️ Rideau Vert : ④ Chambre Vert Canard", targetIdx: 4 },
+          { x: 50, y: 88, label: "🏖️🏡 Vue Globale Immeuble, Plage & Jardin", targetIdx: 10 }
+        ]
+      },
+      {
+        name: "② Cuisine Vue Mer (~8,2 m² — Fenêtre Nord 1,80×1,67m)",
+        shortName: "② Cuisine",
+        pos: [2.85, 1.68, -1.65],
+        lookDir: [0.0, -0.04, -1.0],
+        floorY: 0.03,
+        photoIdx: 2,
+        render3d: "renders_3d/villers_3d_02_cuisine_v3_ouverte.jpg",
+        realPhoto: "textures/room_cuisine.jpg",
+        desc: "Plan en L carrelé marron + micro-ondes + évier double caramel à droite ; frigo Indesit + passage ouvert vers le Salon ③ + cuisinière à gauche ; fenêtre Vue Mer au fond.",
+        hotspots: [
+          { x: 20, y: 56, label: "⬅️ Passage ouvert : ③ Grand Salon Vue Mer", targetIdx: 2 },
+          { x: 46, y: 34, label: "🌊 Voir dehors : ⑨ Plage & Cabines Blanches", targetIdx: 9 },
+          { x: 52, y: 88, label: "⬇️ Revenir : ① Entrée Fleurie", targetIdx: 0 }
+        ]
+      },
+      {
+        name: "③ Grand Salon Vue Mer — Côté Baie Vitrée Nord (~18,0 m²)",
+        shortName: "③ Salon Mer",
+        pos: [0.35, 1.62, -0.15],
+        lookDir: [-0.35, -0.06, -1.0],
+        floorY: 0.03,
+        photoIdx: 0,
+        render3d: "renders_3d/villers_3d_03_salon_corrige.jpg",
+        realPhoto: "textures/room_salon_nord.jpg",
+        desc: "Cheminée blanche à l'Ouest flanquée des 2 placards bois miel, table + 2 bancs devant la triple fenêtre mer à rideaux bleu roi, tapis vagues Nord-Sud, banquette à droite.",
+        hotspots: [
+          { x: 50, y: 32, label: "🌊 Voir par la fenêtre : ⑨ Plage & Cabines", targetIdx: 9 },
+          { x: 84, y: 54, label: "➡️ Passer dans : ② Cuisine Vue Mer", targetIdx: 1 },
+          { x: 66, y: 88, label: "🔄 Se retourner : ③ Salon Côté Sud", targetIdx: 3 },
+          { x: 24, y: 88, label: "⬇️ Aller dans : ④ Chambre Vert Canard", targetIdx: 4 }
+        ]
+      },
+      {
+        name: "③ Grand Salon — Vue Sud vers Double Porte Vitrée & Chambre",
+        shortName: "③ Salon Sud",
+        pos: [0.35, 1.68, -0.85],
+        lookDir: [-1.0, -0.05, -0.2],
+        floorY: 0.03,
+        photoIdx: 0,
+        render3d: "textures/room_salon_sud.jpg",
+        realPhoto: "textures/room_salon_sud.jpg",
+        desc: "Vue depuis la baie vitrée mer vers le Sud : tapis vagues au sol, banquette à gauche, cheminée à droite et grande double porte vitrée ouvrant sur la Chambre ④.",
+        hotspots: [
+          { x: 52, y: 48, label: "⬆️ Franchir la Double Porte : ④ Chambre Vert Canard", targetIdx: 4 },
+          { x: 18, y: 55, label: "⬅️ Entrer dans : ② Cuisine Vue Mer", targetIdx: 1 },
+          { x: 52, y: 86, label: "🔄 Se retourner vers la Mer : ③ Salon Vue Mer", targetIdx: 2 }
+        ]
+      },
+      {
+        name: "④ Chambre / 2e Salon Vert Canard (~14,3 m² — Tapis Persan & Lit Double)",
+        shortName: "④ Chambre",
+        pos: [-0.65, 1.68, 1.65],
+        lookDir: [0.25, -0.06, 1.0],
+        floorY: 0.03,
+        photoIdx: 3,
+        render3d: "renders_3d/villers_3d_04_chambre_corrigee.jpg",
+        realPhoto: "textures/room_chambre_sud.jpg",
+        desc: "Tapis persan bleu ciel + table ronde rotin au centre, commode bois + rideau vert (vers ①) + lit double bleu à droite (Est), meubles rotin/TV + porte SDB/WC à gauche, verrière Loggia au fond.",
+        hotspots: [
+          { x: 38, y: 44, label: "☀️ Sortir par la Verrière : ⑦ Loggia Couverte Sud", targetIdx: 7 },
+          { x: 14, y: 52, label: "⬅️ Couloir Ouest : ⑤ Salle de Bain & ⑥ WC", targetIdx: 5 },
+          { x: 84, y: 48, label: "➡️ Rideau Vert : ① Entrée Fleurie", targetIdx: 0 },
+          { x: 50, y: 88, label: "⬇️ Retourner dans : ③ Grand Salon Vue Mer", targetIdx: 2 }
+        ]
+      },
+      {
+        name: "⑤ Salle de Bain (~3,8 m² — Cumulus, Lave-linge, Lavabo & Douche)",
+        shortName: "⑤ SDB",
+        pos: [-3.75, 1.68, 1.15],
+        lookDir: [-0.3, -0.08, -1.0],
+        floorY: 0.03,
+        photoIdx: 4,
+        render3d: "renders_3d/villers_3d_06_salle_de_bain_seule.jpg",
+        realPhoto: "textures/room_sdb.jpg",
+        desc: "Cumulus vertical au-dessus du lave-linge à gauche, lavabo colonne + miroir au centre, cabine de douche vitrée à droite, fenêtre extérieure Ouest à voilages vert anis.",
+        hotspots: [
+          { x: 24, y: 78, label: "⬅️ Couloir à gauche : ⑥ WC Indépendant", targetIdx: 6 },
+          { x: 76, y: 84, label: "➡️ Ressortir : ④ Chambre Vert Canard", targetIdx: 4 }
+        ]
+      },
+      {
+        name: "⑥ Petit Couloir & WC Indépendant (~1,4 m² — Aile Ouest)",
+        shortName: "⑥ WC",
+        pos: [-3.75, 1.68, 2.55],
+        lookDir: [-1.0, -0.08, 0.2],
+        floorY: 0.03,
+        photoIdx: 5,
+        render3d: "renders_3d/villers_3d_07_wc_independant_seul.jpg",
+        realPhoto: "textures/room_wc.jpg",
+        desc: "Petit dégagement desservant la Salle de Bain ⑤ à droite et le WC indépendant au fond avec sa fenêtre étroite à petits bois et la colonne en fonte.",
+        hotspots: [
+          { x: 72, y: 58, label: "➡️ Entrer dans : ⑤ Salle de Bain", targetIdx: 5 },
+          { x: 50, y: 86, label: "⤵️ Retourner dans : ④ Chambre Vert Canard", targetIdx: 4 }
+        ]
+      },
+      {
+        name: "⑦ Loggia Couverte Sud (9,2 m² Carrez / 12 m² — Vue Jardin)",
+        shortName: "⑦ Loggia",
+        pos: [-0.65, 1.68, 5.25],
+        lookDir: [0.0, -0.18, 1.0],
+        floorY: 0.03,
+        photoIdx: 6,
+        render3d: "renders_3d/villers_3d_07_loggia_corrigee.jpg",
+        realPhoto: "textures/room_loggia.jpg",
+        desc: "Draisienne verte à gauche sous la verrière, table blanche + 4 chaises au centre, mur à colombages avec étendoir et trotteur bébé, grande armoire blanche à droite, vue sur le jardin.",
+        hotspots: [
+          { x: 48, y: 36, label: "🌳 Descendre au Sud : ⑧ Vrai Jardin Arboré (526 m²)", targetIdx: 8 },
+          { x: 26, y: 66, label: "⬆️ Rentrer par la Verrière : ④ Chambre Vert Canard", targetIdx: 4 },
+          { x: 75, y: 86, label: "🏖️🏡 Vue 3D Globale Immeuble, Plage & Jardin", targetIdx: 10 }
+        ]
+      },
+      {
+        name: "⑧ Vrai Jardin Sud (526 m²) & Abords Latéraux Identiques aux Photos",
+        shortName: "⑧ Jardin 526m²",
+        pos: [0.20, -RDC_H + 1.68, 10.5],
+        lookDir: [-0.1, 0.12, -1.0],
+        floorY: -RDC_H + 0.06,
+        photoIdx: 7,
+        outdoor: true,
+        render3d: "renders_3d/villers_3d_08_interieur_exterieur_plage_immeuble_jardin.jpg",
+        realPhoto: "renders_3d/villers_exterieur_04_loggia_et_plage.jpg",
+        desc: "Le vrai jardin divisé en 2 par le muret central avec portillon blanc, massifs fleuris, cabanon blanc à toit rouge au Sud-Ouest, terrasses pavées et bâtiments voisins Ouest/Est.",
+        hotspots: [
+          { x: 46, y: 58, label: "☀️ Monter sur : ⑦ Loggia Couverte Sud", targetIdx: 7 },
+          { x: 46, y: 46, label: "🛏️ Entrer dans : ④ Chambre Vert Canard", targetIdx: 4 },
+          { x: 45, y: 32, label: "🌊 Entrer dans : ③ Grand Salon Vue Mer", targetIdx: 2 },
+          { x: 56, y: 33, label: "🍳 Entrer dans : ② Cuisine Vue Mer", targetIdx: 1 },
+          { x: 50, y: 14, label: "🏖️ Aller au Nord : ⑨ Plage & Cabines Blanches", targetIdx: 9 }
+        ]
+      },
+      {
+        name: "⑨ Façade Mer, Cour Pavée, Cabines Blanches & Plage de Villers",
+        shortName: "⑨ Plage & Mer",
+        pos: [-0.50, -RDC_H + 1.68, -12.2],
+        lookDir: [0.05, 0.14, 1.0],
+        floorY: -RDC_H + 0.06,
+        photoIdx: 7,
+        outdoor: true,
+        render3d: "renders_3d/villers_exterieur_01_drone_plage_cour.jpg",
+        realPhoto: "textures/ext_facade_mer.jpg",
+        desc: "Villa « La Huchette » en 1re ligne face aux cabines de plage blanches et à la Manche : cour pavée avec voitures garées, RDC à damier brique/pierre et notre 1er étage Ouest.",
+        hotspots: [
+          { x: 48, y: 48, label: "🌊 Monter au 1er étage : ③ Grand Salon Vue Mer", targetIdx: 2 },
+          { x: 62, y: 48, label: "🍳 Monter dans : ② Cuisine Vue Mer", targetIdx: 1 },
+          { x: 68, y: 58, label: "🌸 Entrer par : ① Entrée Fleurie", targetIdx: 0 },
+          { x: 48, y: 82, label: "🌳 Voir le Jardin Sud : ⑧ Maquette Intérieur + Extérieur", targetIdx: 8 }
+        ]
+      },
+      {
+        name: "🏖️🏡 0. Maquette 3D Globale : Intérieur 7 Pièces + Immeuble, Plage & Jardin",
+        shortName: "0. Vue Globale",
+        pos: [-15.5, 16.5, 18.5],
+        lookDir: [0.6, -0.5, -0.6],
+        floorY: 0.03,
+        photoIdx: 7,
+        outdoor: true,
+        render3d: "renders_3d/villers_3d_08_interieur_exterieur_plage_immeuble_jardin.jpg",
+        realPhoto: "renders_3d/villers_3d_00_maquette_globale_v11_parfaite.jpg",
+        desc: "Perspective unifiée 75° : clique directement sur n'importe quelle pièce de l'appartement, sur la plage au Nord ou sur le jardin au Sud pour y entrer en marche immersive !",
+        hotspots: [
+          { x: 63, y: 46, label: "① Entrée", targetIdx: 0, compact: true },
+          { x: 61, y: 30, label: "② Cuisine", targetIdx: 1, compact: true },
+          { x: 43, y: 29, label: "③ Salon Mer", targetIdx: 2, compact: true },
+          { x: 46, y: 45, label: "④ Chambre", targetIdx: 4, compact: true },
+          { x: 29, y: 39, label: "⑤ SDB / ⑥ WC", targetIdx: 5, compact: true },
+          { x: 45, y: 58, label: "⑦ Loggia Sud", targetIdx: 7, compact: true },
+          { x: 50, y: 82, label: "🌳 ⑧ Explorer le Jardin (526 m²)", targetIdx: 8, compact: true },
+          { x: 50, y: 10, label: "🏖️ ⑨ Aller sur la Plage & Cabines", targetIdx: 9, compact: true }
+        ]
+      }
+    ];
+
+    // Créer les anneaux lumineux Matterport au sol
+    const hotspotGroup = new THREE.Group();
+    scene.add(hotspotGroup);
+    const hotspotMeshes = [];
+    WALK_STATIONS.forEach((st, idx) => {
+      const ringGroup = new THREE.Group();
+      const outerRing = new THREE.Mesh(
+        new THREE.RingGeometry(0.26, 0.36, 32),
+        new THREE.MeshBasicMaterial({ color: 0xFFFFFF, side: THREE.DoubleSide, transparent: true, opacity: 0.92 })
+      );
+      outerRing.rotation.x = -Math.PI / 2;
+      ringGroup.add(outerRing);
+
+      const innerDisc = new THREE.Mesh(
+        new THREE.CircleGeometry(0.22, 32),
+        new THREE.MeshBasicMaterial({ color: st.outdoor ? 0x0EA5E9 : 0x22C55E, side: THREE.DoubleSide, transparent: true, opacity: 0.55 })
+      );
+      innerDisc.rotation.x = -Math.PI / 2;
+      innerDisc.position.y = -0.005;
+      innerDisc.userData.stationIdx = idx;
+      ringGroup.add(innerDisc);
+      outerRing.userData.stationIdx = idx;
+
+      ringGroup.position.set(st.pos[0], st.floorY, st.pos[2]);
+      ringGroup.userData.stationIdx = idx;
+      ringGroup.userData.baseX = st.pos[0];
+      ringGroup.userData.baseZ = st.pos[2];
+      ringGroup.userData.outdoor = !!st.outdoor;
+      hotspotGroup.add(ringGroup);
+      hotspotMeshes.push(innerDisc, outerRing);
+    });
+
+    // Raycaster pour cliquer directement sur un cercle Matterport au sol !
+    const raycaster = new THREE.Raycaster();
+    const pointer = new THREE.Vector2();
+    let pointerDownPos = { x: 0, y: 0 };
+    renderer.domElement.addEventListener('pointerdown', (e) => {
+      pointerDownPos = { x: e.clientX, y: e.clientY };
+    });
+    renderer.domElement.addEventListener('pointerup', (e) => {
+      if (Math.hypot(e.clientX - pointerDownPos.x, e.clientY - pointerDownPos.y) > 6) return;
+      const rect = renderer.domElement.getBoundingClientRect();
+      pointer.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+      pointer.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+      raycaster.setFromCamera(pointer, camera);
+      const hits = raycaster.intersectObjects(hotspotMeshes, false);
+      if (hits.length > 0 && typeof hits[0].object.userData.stationIdx === 'number') {
+        window.walkToStation(hits[0].object.userData.stationIdx);
+      }
+    });
+
+    let targetCamPos = null;
+    let targetLookAt = null;
+    let autoSpin = false;
+    let isWalkMode = false;
+    let currentWalkEyeY = 1.68;
+    let autoWalkTimer = null;
+    let autoWalkIndex = 0;
+
+    window.visualSubMode = 'render3d'; // 'render3d' | 'realphoto' | 'split' | 'webgl'
+    window.currentStationIdx = 2;
+    let panZoom = { scale: 1.0, x: 0, y: 0, isDragging: false, startX: 0, startY: 0 };
+
+    function applyPanZoomTransform() {
+      const panEl = document.getElementById('photoreal-pan-container');
+      if (panEl) {
+        panEl.style.transform = `translate(${panZoom.x}px, ${panZoom.y}px) scale(${panZoom.scale})`;
+      }
+    }
+
+    // Drag to look around & wheel to zoom in Photorealistic Stage
+    const prViewport = document.getElementById('photoreal-viewport');
+    if (prViewport) {
+      prViewport.addEventListener('pointerdown', (e) => {
+        if (e.target.closest('.scene-hotspot')) return;
+        panZoom.isDragging = true;
+        panZoom.startX = e.clientX - panZoom.x;
+        panZoom.startY = e.clientY - panZoom.y;
+      });
+      window.addEventListener('pointermove', (e) => {
+        if (!panZoom.isDragging) return;
+        panZoom.x = Math.max(-320, Math.min(320, e.clientX - panZoom.startX));
+        panZoom.y = Math.max(-220, Math.min(220, e.clientY - panZoom.startY));
+        applyPanZoomTransform();
+      });
+      window.addEventListener('pointerup', () => {
+        panZoom.isDragging = false;
+      });
+      prViewport.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        const delta = e.deltaY < 0 ? 0.12 : -0.12;
+        panZoom.scale = Math.max(0.85, Math.min(2.6, panZoom.scale + delta));
+        applyPanZoomTransform();
+      }, { passive: false });
+    }
+
+    window.setVisualSubMode = function(mode) {
+      window.visualSubMode = mode;
+      ['render3d', 'realphoto', 'split', 'webgl'].forEach(m => {
+        const b = document.getElementById('vbtn-' + m);
+        if (b) b.classList.toggle('active', m === mode);
+      });
+      const stageEl = document.getElementById('photoreal-stage');
+      const singleWrap = document.getElementById('photoreal-single-wrap');
+      const splitWrap = document.getElementById('photoreal-split-wrap');
+      if (mode === 'webgl') {
+        stageEl.classList.remove('visible');
+        document.body.classList.remove('photoreal-active');
+      } else {
+        stageEl.classList.add('visible');
+        document.body.classList.add('photoreal-active');
+        if (mode === 'split') {
+          singleWrap.style.display = 'none';
+          splitWrap.classList.add('active');
+        } else {
+          singleWrap.style.display = 'flex';
+          splitWrap.classList.remove('active');
+        }
+        renderPhotorealStation(window.currentStationIdx, false);
+      }
+    };
+
+    function renderPhotorealStation(idx, animateStep = true) {
+      const st = WALK_STATIONS[idx] || WALK_STATIONS[0];
+      window.currentStationIdx = idx;
+
+      const panEl = document.getElementById('photoreal-pan-container');
+      if (animateStep && panEl) {
+        panEl.classList.add('stepping');
+        setTimeout(() => {
+          panZoom.scale = 1.0;
+          panZoom.x = 0;
+          panZoom.y = 0;
+          applyPanZoomTransform();
+          panEl.classList.remove('stepping');
+        }, 160);
+      } else {
+        panZoom.scale = 1.0;
+        panZoom.x = 0;
+        panZoom.y = 0;
+        applyPanZoomTransform();
+      }
+
+      const mainImg = document.getElementById('photoreal-main-img');
+      if (mainImg) {
+        mainImg.src = (window.visualSubMode === 'realphoto') ? st.realPhoto : st.render3d;
+      }
+      const splitOrig = document.getElementById('photoreal-split-orig');
+      const split3d = document.getElementById('photoreal-split-3d');
+      if (splitOrig) splitOrig.src = st.realPhoto;
+      if (split3d) split3d.src = st.render3d;
+
+      const bTitle = document.getElementById('st-banner-title');
+      const bDesc = document.getElementById('st-banner-desc');
+      if (bTitle) bTitle.textContent = st.name;
+      if (bDesc) bDesc.textContent = st.desc;
+
+      const radarLbl = document.getElementById('radar-active-label');
+      if (radarLbl) radarLbl.textContent = st.shortName || st.name;
+      document.querySelectorAll('.radar-pin').forEach(pin => {
+        pin.classList.toggle('active', parseInt(pin.dataset.st, 10) === idx);
+      });
+
+      // Render interactive Matterport hotspots on the image
+      const hsLayer = document.getElementById('photoreal-hotspots-layer');
+      if (hsLayer) {
+        hsLayer.innerHTML = '';
+        (st.hotspots || []).forEach(hs => {
+          const btn = document.createElement('button');
+          btn.className = 'scene-hotspot' + (hs.compact ? ' compact-pin' : '');
+          btn.style.left = hs.x + '%';
+          btn.style.top = hs.y + '%';
+          btn.innerHTML = `<span class="hs-ring"></span><span>${hs.label}</span>`;
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            window.walkToStation(hs.targetIdx);
+          });
+          hsLayer.appendChild(btn);
+        });
+      }
+    }
+
+    function updateWalkModeUI(active) {
+      isWalkMode = active;
+      document.getElementById('btn-walk-mode').classList.toggle('active', active);
+      document.getElementById('walk-hud').classList.toggle('visible', active);
+      const cbLabels = document.getElementById('toggle-labels');
+      labelsContainer.style.display = (cbLabels.checked && !active && window.visualSubMode === 'webgl') ? 'block' : 'none';
+      controls.maxPolarAngle = active ? Math.PI * 0.85 : (Math.PI / 2 - 0.01);
+      camera.fov = active ? 72 : 45;
+      camera.updateProjectionMatrix();
+    }
+
+    window.walkToStation = function(idx, fromAutoTour = false) {
+      if (!fromAutoTour && autoWalkTimer) {
+        clearInterval(autoWalkTimer);
+        autoWalkTimer = null;
+        document.getElementById('btn-autowalk-mode').textContent = "▶️ Visite Marche Automatique (Pièce par Pièce + Jardin & Plage)";
+        const hudBtn = document.getElementById('btn-hud-autowalk');
+        if (hudBtn) hudBtn.textContent = "▶️ Marche Auto";
+      }
+      const st = WALK_STATIONS[idx] || WALK_STATIONS[0];
+      autoSpin = false;
+      document.getElementById('btn-spin').classList.remove('active');
+      updateWalkModeUI(true);
+      window.selectRefPhoto(st.photoIdx);
+
+      // Show Photorealistic Stage unless user explicitly selected WebGL-only mode
+      if (window.visualSubMode !== 'webgl') {
+        document.getElementById('photoreal-stage').classList.add('visible');
+      }
+      renderPhotorealStation(idx, true);
+
+      const s = st.outdoor ? 1.0 : apartmentGroup.scale.x;
+      const px = st.pos[0] * s;
+      const py = st.pos[1];
+      const pz = st.pos[2] * s;
+      currentWalkEyeY = py;
+
+      const dir = new THREE.Vector3(st.lookDir[0], st.lookDir[1], st.lookDir[2]).normalize();
+      const tx = px + dir.x * 0.65;
+      const ty = py + dir.y * 0.65;
+      const tz = pz + dir.z * 0.65;
+
+      // Immediately place WebGL camera inside the room so OrbitControls never gets stuck outside!
+      camera.position.set(px, py, pz);
+      controls.target.set(tx, ty, tz);
+      controls.update();
+      targetCamPos = null;
+      targetLookAt = null;
+    };
+
+    window.toggleAutoWalkTour = function() {
+      if (autoWalkTimer) {
+        clearInterval(autoWalkTimer);
+        autoWalkTimer = null;
+        document.getElementById('btn-autowalk-mode').textContent = "▶️ Visite Marche Automatique (Pièce par Pièce + Jardin & Plage)";
+        const hudBtn = document.getElementById('btn-hud-autowalk');
+        if (hudBtn) hudBtn.textContent = "▶️ Marche Auto";
+        return;
+      }
+      autoWalkIndex = 0;
+      window.walkToStation(autoWalkIndex, true);
+      document.getElementById('btn-autowalk-mode').textContent = "⏸️ Pause Marche Automatique (En cours...)";
+      const hudBtn = document.getElementById('btn-hud-autowalk');
+      if (hudBtn) hudBtn.textContent = "⏸️ Pause Auto";
+
+      autoWalkTimer = setInterval(() => {
+        autoWalkIndex = (autoWalkIndex + 1) % WALK_STATIONS.length;
+        window.walkToStation(autoWalkIndex, true);
+      }, 4200);
+    };
+
+    window.toggleWalkMode = function() {
+      if (!isWalkMode) {
+        window.walkToStation(2); // Démarre dans le Salon Vue Mer à 1,68m !
+      } else {
+        if (autoWalkTimer) window.toggleAutoWalkTour();
+        window.setCameraPreset('dollhouse', false);
+      }
+    };
+
+    const PRESET_TO_STATION = {
+      site_complet: 10,
+      dollhouse: 10,
+      rue_cour_mer: 9,
+      loggia_jardin: 8,
+      couloir_entree: 0,
+      cuisine_mer: 1,
+      sejour_mer: 2,
+      piece_verte: 4,
+      sdb_wc: 5,
+      top_plan: 10
+    };
+
+    window.setCameraPreset = function(key, instant = false) {
+      const p = CAM_PRESETS[key];
+      if (!p) return;
+      if (autoWalkTimer) window.toggleAutoWalkTour();
+      autoSpin = false;
+      document.getElementById('btn-spin').classList.remove('active');
+      document.querySelectorAll('.cam-btn[data-cam]').forEach(b => {
+        b.classList.toggle('active', b.dataset.cam === key);
+      });
+      window.selectRefPhoto(p.photoIdx);
+      updateWalkModeUI(!!p.walk);
+      camera.fov = p.fov || 45;
+      camera.updateProjectionMatrix();
+
+      const stIdx = (typeof PRESET_TO_STATION[key] === 'number') ? PRESET_TO_STATION[key] : 2;
+      renderPhotorealStation(stIdx, true);
+
+      const s = p.walk ? apartmentGroup.scale.x : 1.0;
+      const px = p.pos[0] * s, py = p.pos[1], pz = p.pos[2] * s;
+      const tx = p.target[0] * s, ty = p.target[1], tz = p.target[2] * s;
+      if (p.walk) currentWalkEyeY = py;
+
+      camera.position.set(px, py, pz);
+      controls.target.set(tx, ty, tz);
+      controls.update();
+      targetCamPos = null;
+      targetLookAt = null;
+    };
+
+    document.querySelectorAll('.cam-btn[data-cam]').forEach(btn => {
+      btn.addEventListener('click', () => window.setCameraPreset(btn.dataset.cam, false));
+    });
+
+    // Initialisation immédiate du visuel photoréaliste (100% identique au vrai dès la milliseconde 0)
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('webgl') === '1') {
+      window.setVisualSubMode('webgl');
+    }
+    if (urlParams.get('autowalk') === '1') {
+      window.walkToStation(0, true);
+      setTimeout(() => window.toggleAutoWalkTour(), 150);
+    } else if (urlParams.get('walk') === '1') {
+      window.walkToStation(2, false); // Démarre directement dans le Grand Salon Vue Mer photoréaliste avec pastilles Matterport !
+    } else {
+      renderPhotorealStation(10, false); // Vue Maquette 3D Globale Intérieur + Extérieur Photoréaliste
+      updateWalkModeUI(true);
+    }
+
+    // --- KEYBOARD & D-PAD FIRST-PERSON WALK MOVEMENT ---
+    const keysPressed = {};
+    let activeStepAction = null;
+
+    window.addEventListener('keydown', (e) => {
+      keysPressed[e.code] = true;
+      if (window.visualSubMode !== 'webgl') {
+        if (e.code === 'ArrowRight' || e.code === 'ArrowUp') {
+          const nextIdx = (window.currentStationIdx + 1) % WALK_STATIONS.length;
+          window.walkToStation(nextIdx);
+        } else if (e.code === 'ArrowLeft' || e.code === 'ArrowDown') {
+          const prevIdx = (window.currentStationIdx - 1 + WALK_STATIONS.length) % WALK_STATIONS.length;
+          window.walkToStation(prevIdx);
+        }
+      }
+      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'KeyW', 'KeyS', 'KeyA', 'KeyD', 'KeyZ', 'KeyQ'].includes(e.code)) {
+        targetCamPos = null;
+        targetLookAt = null;
+      }
+    });
+    window.addEventListener('keyup', (e) => {
+      keysPressed[e.code] = false;
+    });
+
+    window.startWalkStep = function(action) {
+      activeStepAction = action;
+      targetCamPos = null;
+      targetLookAt = null;
+    };
+    window.stopWalkStep = function() {
+      activeStepAction = null;
+    };
+
+    function processWalkMovement() {
+      const fwd = keysPressed['ArrowUp'] || keysPressed['KeyW'] || keysPressed['KeyZ'] || activeStepAction === 'fwd';
+      const back = keysPressed['ArrowDown'] || keysPressed['KeyS'] || activeStepAction === 'back';
+      const left = keysPressed['KeyA'] || keysPressed['KeyQ'] || activeStepAction === 'left';
+      const right = keysPressed['KeyD'] || activeStepAction === 'right';
+      const turnL = keysPressed['ArrowLeft'] || activeStepAction === 'turnL';
+      const turnR = keysPressed['ArrowRight'] || activeStepAction === 'turnR';
+
+      if (!fwd && !back && !left && !right && !turnL && !turnR) return;
+
+      const forwardVec = new THREE.Vector3().subVectors(controls.target, camera.position);
+      forwardVec.y = 0;
+      if (forwardVec.lengthSq() < 0.0001) forwardVec.set(0, 0, -1);
+      forwardVec.normalize();
+      const rightVec = new THREE.Vector3().crossVectors(forwardVec, new THREE.Vector3(0, 1, 0)).normalize();
+
+      const moveSpeed = 0.075;
+      const delta = new THREE.Vector3();
+      if (fwd) delta.addScaledVector(forwardVec, moveSpeed);
+      if (back) delta.addScaledVector(forwardVec, -moveSpeed);
+      if (left) delta.addScaledVector(rightVec, -moveSpeed);
+      if (right) delta.addScaledVector(rightVec, moveSpeed);
+
+      camera.position.add(delta);
+      controls.target.add(delta);
+
+      if (isWalkMode) {
+        camera.position.y = currentWalkEyeY;
+      }
+
+      if (turnL || turnR) {
+        const angle = (turnL ? 1 : -1) * 0.032;
+        const offset = new THREE.Vector3().subVectors(controls.target, camera.position);
+        offset.applyAxisAngle(new THREE.Vector3(0, 1, 0), angle);
+        controls.target.copy(camera.position).add(offset);
+      }
+    }
+
+    // Scale / Proportions Slider
+    const scaleSlider = document.getElementById('scale-slider');
+    const scaleLabel = document.getElementById('scale-label');
+    scaleSlider.addEventListener('input', (e) => {
+      const pct = parseInt(e.target.value, 10);
+      scaleLabel.textContent = pct + " %";
+      const s = pct / 100;
+      apartmentGroup.scale.set(s, 1.0, s);
+    });
+
+    const btnSpin = document.getElementById('btn-spin');
+    btnSpin.addEventListener('click', () => {
+      autoSpin = !autoSpin;
+      btnSpin.classList.toggle('active', autoSpin);
+      targetCamPos = null;
+    });
+
+    const sunSlider = document.getElementById('sun-slider');
+    const sunLabel = document.getElementById('sun-label');
+    sunSlider.addEventListener('input', (e) => {
+      const val = parseFloat(e.target.value) / 100;
+      const angle = (val - 0.5) * Math.PI * 0.85;
+      sunLight.position.set(Math.sin(angle) * 16, 13 - Math.abs(val - 0.5) * 8, Math.cos(angle) * 13);
+      if (val < 0.3) {
+        sunLabel.textContent = "Matin (Est)";
+        sunLight.color.setHex(0xFFF3D6);
+      } else if (val > 0.72) {
+        sunLabel.textContent = "Coucher Mer";
+        sunLight.color.setHex(0xFFD29D);
+      } else {
+        sunLabel.textContent = "Midi Solaire";
+        sunLight.color.setHex(0xFFF8EB);
+      }
+    });
+
+    let smartCutawayEnabled = true;
+    document.getElementById('toggle-cutaway').addEventListener('change', (e) => {
+      smartCutawayEnabled = e.target.checked;
+      if (!smartCutawayEnabled) {
+        cutawayWalls.forEach(g => g.visible = true);
+      }
+    });
+
+    document.getElementById('toggle-roof').addEventListener('change', (e) => {
+      roofGroup.visible = e.target.checked;
+    });
+
+    document.getElementById('toggle-lines').addEventListener('change', (e) => {
+      const show = e.target.checked;
+      allEdgeLines.forEach(l => { l.visible = show; });
+    });
+
+    document.getElementById('toggle-labels').addEventListener('change', (e) => {
+      labelsContainer.style.display = e.target.checked ? 'block' : 'none';
+    });
+
+    document.getElementById('btn-screenshot').addEventListener('click', () => {
+      renderer.render(scene, camera);
+      const dataUrl = renderer.domElement.toDataURL('image/png');
+      const a = document.createElement('a');
+      a.href = dataUrl;
+      a.download = `villers-lot4-3d-${window.isRenovatedMode ? 'renove' : 'actuel'}.png`;
+      a.click();
+    });
+
+    document.getElementById('btn-export-obj').addEventListener('click', () => {
+      const exporter = new OBJExporter();
+      const result = exporter.parse(apartmentGroup);
+      const blob = new Blob([result], { type: 'text/plain' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'appartement-villers-la-huchette-lot4.obj';
+      a.click();
+    });
+
+    controls.addEventListener('start', () => {
+      targetCamPos = null;
+      targetLookAt = null;
+    });
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    // --- ANIMATION LOOP ---
+    const camDir = new THREE.Vector3();
+    function animate() {
+      requestAnimationFrame(animate);
+
+      if (targetCamPos && targetLookAt) {
+        camera.position.lerp(targetCamPos, 0.09);
+        controls.target.lerp(targetLookAt, 0.09);
+        if (camera.position.distanceTo(targetCamPos) < 0.05) {
+          targetCamPos = null;
+          targetLookAt = null;
+        }
+      }
+
+      processWalkMovement();
+
+      if (autoSpin) {
+        const speed = 0.004;
+        const x = camera.position.x - controls.target.x;
+        const z = camera.position.z - controls.target.z;
+        camera.position.x = controls.target.x + x * Math.cos(speed) - z * Math.sin(speed);
+        camera.position.z = controls.target.z + z * Math.cos(speed) + x * Math.sin(speed);
+      }
+
+      controls.update();
+
+      const dist = camera.position.distanceTo(controls.target);
+      if (smartCutawayEnabled && !isWalkMode && dist > 6.5 && camera.position.y < 16.0) {
+        camDir.subVectors(camera.position, controls.target).normalize();
+        cutawayWalls.forEach(wg => {
+          const dot = wg.userData.normal.dot(camDir);
+          wg.visible = (dot < 0.35);
+        });
+      } else {
+        cutawayWalls.forEach(wg => { wg.visible = true; });
+      }
+
+      renderer.render(scene, camera);
+
+      const halfW = window.innerWidth / 2;
+      const halfH = window.innerHeight / 2;
+      const sx = apartmentGroup.scale.x;
+      const sz = apartmentGroup.scale.z;
+      labelElements.forEach(item => {
+        const v = new THREE.Vector3(item.basePos.x * sx, item.basePos.y, item.basePos.z * sz).project(camera);
+        if (v.z > 1) {
+          item.el.style.opacity = '0';
+        } else {
+          item.el.style.opacity = '1';
+          item.el.style.left = `${(v.x * halfW) + halfW}px`;
+          item.el.style.top = `${-(v.y * halfH) + halfH}px`;
+        }
+      });
+    }
+
+    animate();
+  </script>
+</body>
+</html>

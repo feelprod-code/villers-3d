@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Villers 3D" />
+  <title>La Huchette — Atelier Déco & Travaux</title>
+  <style>
+    :root {
+      --bg: #FAF7F2;
+      --card: #FFFFFF;
+      --border: #EAE4D9;
+      --ink: #1E293B;
+      --muted: #64748B;
+      --terracotta: #8C4E33;
+      --slate-blue: #4A7C9B;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* EN-TÊTE MINIMALISTE */
+    header {
+      height: 60px;
+      padding: 0 32px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--bg);
+      flex-shrink: 0;
+    }
+
+    .brand {
+      font-family: Georgia, "Playfair Display", serif;
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--ink);
+      letter-spacing: -0.01em;
+    }
+
+    .brand span {
+      font-family: -apple-system, BlinkMacSystemFont, "Inter", sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--terracotta);
+      margin-left: 10px;
+    }
+
+    .nav-tabs {
+      display: flex;
+      gap: 6px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 4px;
+    }
+
+    .nav-tab {
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      font-size: 12.5px;
+      font-weight: 600;
+      padding: 7px 18px;
+      border-radius: 999px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.18s ease;
+    }
+
+    .nav-tab.active {
+      background: var(--ink);
+      color: #FFFFFF;
+    }
+
+    .pdf-link {
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--terracotta);
+      background: var(--card);
+      border: 1px solid var(--border);
+      padding: 8px 16px;
+      border-radius: 999px;
+      transition: all 0.18s ease;
+    }
+
+    .pdf-link:hover {
+      border-color: var(--terracotta);
+    }
+
+    /* GRILLE PRINCIPALE ÉPURÉE */
+    main {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 24px;
+      padding: 20px 32px 24px;
+      min-height: 0;
+    }
+
+    /* CADRE VISUEL GAUCHE */
+    .stage-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 0;
+      box-shadow: 0 12px 32px rgba(30, 41, 59, 0.03);
+    }
+
+    .compare-viewport {
+      position: relative;
+      flex: 1;
+      width: 100%;
+      border-radius: 18px;
+      overflow: hidden;
+      background: #F4EFE6;
+      cursor: ew-resize;
+      min-height: 0;
+    }
+
+    .compare-viewport img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      pointer-events: none;
+    }
+
+    /* Calque Après (Rénové) en fond + filtre subtil temps réel pour les nuances Farrow & Ball */
+    #img-after {
+      z-index: 1;
+      transition: filter 0.25s ease;
+    }
+
+    #tint-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      pointer-events: none;
+      mix-blend-mode: multiply;
+      opacity: 0;
+      transition: background-color 0.25s ease, opacity 0.25s ease;
+    }
+
+    /* Calque Avant (Actuel 1970) découpé par clip-path */
+    #before-clip {
+      position: absolute;
+      inset: 0;
+      z-index: 3;
+      clip-path: inset(0 50% 0 0);
+    }
+
+    /* Ligne de glissière Avant / Après */
+    .slider-line {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 50%;
+      width: 2px;
+      background: #FFFFFF;
+      z-index: 5;
+      pointer-events: none;
+      box-shadow: 0 0 12px rgba(15, 23, 42, 0.35);
+    }
+
+    .slider-handle {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #FFFFFF;
+      color: var(--ink);
+      border: 1.5px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      box-shadow: 0 6px 18px rgba(15, 23, 42, 0.18);
+    }
+
+    .corner-tag {
+      position: absolute;
+      top: 14px;
+      z-index: 6;
+      background: rgba(255, 255, 255, 0.90);
+      backdrop-filter: blur(8px);
+      color: var(--ink);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 5px 13px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      pointer-events: none;
+    }
+
+    .corner-tag.left { left: 14px; }
+    .corner-tag.right { right: 14px; color: var(--terracotta); }
+
+    .stage-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 12px;
+    }
+
+    .view-pills {
+      display: flex;
+      gap: 6px;
+    }
+
+    .pill-btn {
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--muted);
+      font-size: 11.5px;
+      font-weight: 600;
+      padding: 6px 14px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .pill-btn.active {
+      background: var(--ink);
+      color: #FFFFFF;
+      border-color: var(--ink);
+    }
+
+    .active-ref-summary {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .active-ref-summary strong {
+      color: var(--ink);
+      font-weight: 600;
+    }
+
+    /* CARTE DE CONTRÔLE DROITE (STYLE SITE-01 / SITE-02 ULTRA ÉPURÉ) */
+    .control-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: 0 12px 32px rgba(30, 41, 59, 0.03);
+      overflow-y: auto;
+    }
+
+    .section-block {
+      padding-bottom: 10px;
+      margin-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .section-block:last-of-type {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .section-label {
+      font-size: 9.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--terracotta);
+      margin-bottom: 7px;
+    }
+
+    .room-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 5px;
+    }
+
+    .choice-btn {
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--ink);
+      font-size: 11.5px;
+      font-weight: 600;
+      padding: 6.5px 10px;
+      border-radius: 10px;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.15s ease;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .choice-btn:hover {
+      border-color: #CBD5E1;
+    }
+
+    .choice-btn.active {
+      background: var(--ink);
+      color: #FFFFFF;
+      border-color: var(--ink);
+    }
+
+    .choice-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .choice-btn small {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--terracotta);
+    }
+
+    .choice-btn.active small {
+      color: #FDE68A;
+    }
+
+    /* Nuancier Peintures Farrow & Ball */
+    .swatch-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+
+    .swatch-item {
+      border: 1px solid var(--border);
+      background: var(--bg);
+      border-radius: 12px;
+      padding: 8px 4px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .swatch-item.active {
+      border-color: var(--ink);
+      background: #FFFFFF;
+      box-shadow: 0 4px 12px rgba(30, 41, 59, 0.08);
+    }
+
+    .swatch-circle {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      border: 1px solid rgba(15, 23, 42, 0.18);
+    }
+
+    .swatch-name {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--ink);
+      text-align: center;
+      line-height: 1.15;
+    }
+
+    /* Pied de carte : Prix dédié + Import LiDAR */
+    .price-box {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 12px 14px;
+      margin-top: 8px;
+    }
+
+    .price-box-ref {
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--ink);
+      margin-bottom: 4px;
+    }
+
+    .price-box-amount {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--terracotta);
+    }
+
+    .lidar-btn {
+      margin-top: 10px;
+      width: 100%;
+      border: 1px dashed var(--terracotta);
+      background: #FFFFFF;
+      color: var(--terracotta);
+      font-size: 11.5px;
+      font-weight: 600;
+      padding: 9px 12px;
+      border-radius: 12px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.15s ease;
+      display: block;
+    }
+
+    .lidar-btn:hover {
+      background: var(--bg);
+    }
+
+    /* RESPONSIVE IPHONE & IPAD (410px - 900px) */
+    @media (max-width: 900px) {
+      body {
+        height: auto;
+        min-height: 100dvh;
+        overflow-y: auto;
+        overflow-x: hidden;
+      }
+      header {
+        height: auto;
+        padding: 12px 16px;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      .brand {
+        font-size: 15px;
+      }
+      .brand span {
+        font-size: 10px;
+        margin-left: 6px;
+      }
+      .nav-tabs {
+        order: 3;
+        width: 100%;
+        justify-content: space-between;
+      }
+      .nav-tab {
+        flex: 1;
+        text-align: center;
+        padding: 7px 8px;
+        font-size: 12px;
+      }
+      .pdf-link {
+        padding: 6px 12px;
+        font-size: 11px;
+      }
+      main {
+        display: flex;
+        flex-direction: column;
+        padding: 12px 14px 32px;
+        gap: 14px;
+      }
+      .stage-card {
+        padding: 10px;
+        border-radius: 20px;
+      }
+      .compare-viewport {
+        height: 54vw;
+        min-height: 250px;
+        max-height: 380px;
+        border-radius: 14px;
+        touch-action: pan-y;
+      }
+      .stage-footer {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+      }
+      .view-pills {
+        width: 100%;
+        justify-content: space-between;
+      }
+      .pill-btn {
+        flex: 1;
+        text-align: center;
+        padding: 7px 8px;
+      }
+      .control-card {
+        border-radius: 20px;
+        padding: 16px;
+        overflow: visible;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- EN-TÊTE MINIMALISTE -->
+  <header>
+    <div class="brand">
+      La Huchette <span>Villers-sur-Mer</span>
+    </div>
+
+    <nav class="nav-tabs">
+      <a href="studio-deco.html" class="nav-tab active">Atelier Déco</a>
+      <a href="appartement-villers-3d.html?walk=1&v=40" class="nav-tab">Visite 3D</a>
+      <a href="appartement-villers-3d.html?v=40" class="nav-tab">Maquette</a>
+    </nav>
+
+    <a href="TUTORIEL_APPLICATION_ET_SCAN_IPHONE_VILLERS_3D.pdf" target="_blank" class="pdf-link">
+      Tutoriel PDF
+    </a>
+  </header>
+
+  <!-- CORPS ÉPURÉ -->
+  <main>
+    <!-- GAUCHE : COMPARATEUR VISUEL AVANT / APRÈS -->
+    <div class="stage-card">
+      <div class="compare-viewport" id="compare-viewport">
+        <!-- Image Après (Projet Rénové) -->
+        <img id="img-after" src="renders_3d/villers_deco_02_cuisine_americaine_ouverte.jpg" alt="Projet Rénové" />
+        <div id="tint-overlay"></div>
+
+        <!-- Image Avant (État 1970) -->
+        <div id="before-clip">
+          <img id="img-before" src="renders_3d/villers_3d_02_cuisine_v3_ouverte.jpg" alt="État Actuel" />
+        </div>
+
+        <!-- Curseur Avant / Après -->
+        <div class="slider-line" id="slider-line">
+          <div class="slider-handle">↔</div>
+        </div>
+
+        <div class="corner-tag left" id="tag-before">Actuel</div>
+        <div class="corner-tag right" id="tag-after">Projet • Bar Américain Ouvert</div>
+      </div>
+
+      <div class="stage-footer">
+        <div class="view-pills">
+          <button class="pill-btn active" id="mode-split" onclick="setCompareMode('split')">Avant / Après</button>
+          <button class="pill-btn" id="mode-after" onclick="setCompareMode('after')">Projet Seul</button>
+          <button class="pill-btn" id="mode-before" onclick="setCompareMode('before')">Actuel Seul</button>
+        </div>
+        <div class="active-ref-summary" id="active-ref-summary">
+          <strong>② Cuisine Vue Mer</strong> • IKEA Metod Voxtorp &amp; Chêne Karlby
+        </div>
+      </div>
+    </div>
+
+    <!-- DROITE : SÉLECTEUR MINIMALISTE -->
+    <aside class="control-card">
+      <div>
+        <!-- 01. PIÈCE -->
+        <div class="section-block">
+          <div class="section-label">01. Pièce</div>
+          <div class="room-grid">
+            <button class="choice-btn active" data-room="cuisine" onclick="selectRoom('cuisine')">② Cuisine</button>
+            <button class="choice-btn" data-room="salon" onclick="selectRoom('salon')">③ Salon</button>
+            <button class="choice-btn" data-room="chambre" onclick="selectRoom('chambre')">④ Chambre</button>
+            <button class="choice-btn" data-room="entree" onclick="selectRoom('entree')">① Entrée</button>
+          </div>
+        </div>
+
+        <!-- 02. TRAVAUX & CLOISON -->
+        <div class="section-block" id="block-travaux">
+          <div class="section-label">02. Cloison Cuisine ↔ Salon</div>
+          <div class="choice-list">
+            <button class="choice-btn active" data-wall="open_bar" onclick="selectWallOption('open_bar')">
+              <span>Bar Américain Ouvert</span>
+              <small>Chêne</small>
+            </button>
+            <button class="choice-btn" data-wall="keep_wall" onclick="selectWallOption('keep_wall')">
+              <span>Cloison Actuelle Conservée</span>
+              <small>0 €</small>
+            </button>
+          </div>
+        </div>
+
+        <!-- 03. CUISINE RÉFÉRENCÉE -->
+        <div class="section-block" id="block-cuisine">
+          <div class="section-label">03. Cuisine Référencée (France)</div>
+          <div class="choice-list">
+            <button class="choice-btn active" data-kitchen="ikea" onclick="selectKitchen('ikea')">
+              <span>IKEA Metod • Voxtorp &amp; Karlby</span>
+              <small>2 850 €</small>
+            </button>
+            <button class="choice-btn" data-kitchen="plum" onclick="selectKitchen('plum')">
+              <span>Plum Living • Craie &amp; Zellige</span>
+              <small>4 200 €</small>
+            </button>
+            <button class="choice-btn" data-kitchen="delinia" onclick="selectKitchen('delinia')">
+              <span>Leroy Merlin • Delinia Sevilla</span>
+              <small>3 400 €</small>
+            </button>
+          </div>
+        </div>
+
+        <!-- 04. PEINTURES MURS (FARROW & BALL) -->
+        <div class="section-block">
+          <div class="section-label">04. Murs (Farrow &amp; Ball)</div>
+          <div class="swatch-row">
+            <div class="swatch-item active" data-paint="wimborne" onclick="selectPaint('wimborne')">
+              <div class="swatch-circle" style="background:#FAF7F2;"></div>
+              <div class="swatch-name">Wimborne<br/>N°239</div>
+            </div>
+            <div class="swatch-item" data-paint="schoolhouse" onclick="selectPaint('schoolhouse')">
+              <div class="swatch-circle" style="background:#EAE3D5;"></div>
+              <div class="swatch-name">Lin Chaud<br/>N°291</div>
+            </div>
+            <div class="swatch-item" data-paint="sauge" onclick="selectPaint('sauge')">
+              <div class="swatch-circle" style="background:#CBD6C8;"></div>
+              <div class="swatch-name">Sauge<br/>N°234</div>
+            </div>
+            <div class="swatch-item" data-paint="denimes" onclick="selectPaint('denimes')">
+              <div class="swatch-circle" style="background:#C5D3DC;"></div>
+              <div class="swatch-name">De Nimes<br/>N°299</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 05. SOLS RÉFÉRENCÉS -->
+        <div class="section-block">
+          <div class="section-label">05. Sol &amp; Boiseries</div>
+          <div class="choice-list">
+            <button class="choice-btn active" data-floor="pin_clair" onclick="selectFloor('pin_clair')">
+              <span>Pin Poncé Bona Extra-Mat</span>
+              <small>35 €/m²</small>
+            </button>
+            <button class="choice-btn" data-floor="gerflor" onclick="selectFloor('gerflor')">
+              <span>Gerflor Chêne Blond 19 dB</span>
+              <small>40 €/m²</small>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- RÉFÉRENCE & IMPORT LIDAR -->
+      <div>
+        <div class="price-box">
+          <div class="price-box-ref" id="ref-line">IKEA Metod Voxtorp + Bar Américain Chêne + F&amp;B N°239</div>
+          <div class="price-box-amount" id="price-line">2 850 € TTC (fourniture cuisine)</div>
+        </div>
+
+        <label class="lidar-btn">
+          Importer Scan LiDAR iPhone (.GLB / Plan)
+          <input type="file" accept=".glb,.usdz,.obj,.pdf" style="display:none;" onchange="handleLidarImport(this)" />
+        </label>
+      </div>
+    </aside>
+  </main>
+
+  <script>
+    const ROOMS = {
+      cuisine: {
+        title: "② Cuisine Vue Mer",
+        before: "renders_3d/villers_3d_02_cuisine_v3_ouverte.jpg",
+        after_open: "renders_3d/villers_deco_02_cuisine_americaine_ouverte.jpg",
+        after_keep: "renders_3d/villers_deco_02_cuisine_renovee.jpg",
+        hasWallOption: true,
+        hasKitchenOption: true
+      },
+      salon: {
+        title: "③ Grand Salon Vue Mer",
+        before: "renders_3d/villers_3d_03_salon_corrige.jpg",
+        after_open: "renders_3d/villers_deco_03_salon_renove.jpg",
+        after_keep: "renders_3d/villers_deco_03_salon_renove.jpg",
+        hasWallOption: false,
+        hasKitchenOption: false,
+        ref: "Canapé Lin Bouclé + Placards Cheminée Grège Mat + F&B Wimborne White N°239",
+        price: "1 890 € TTC (mobilier & peintures salon)"
+      },
+      chambre: {
+        title: "④ Chambre",
+        before: "renders_3d/villers_3d_04_chambre_corrigee.jpg",
+        after_open: "renders_3d/villers_deco_04_chambre_renovee.jpg",
+        after_keep: "renders_3d/villers_deco_04_chambre_renovee.jpg",
+        hasWallOption: false,
+        hasKitchenOption: false,
+        ref: "Tête de lit F&B Vert de Terre N°234 + Parure Lin Lavé + Commode Chêne Clair",
+        price: "1 150 € TTC (mobilier & peintures chambre)"
+      },
+      entree: {
+        title: "① Entrée",
+        before: "renders_3d/villers_3d_01_entree_fleurie_seule.jpg",
+        after_open: "renders_3d/villers_3d_01_entree_fleurie_seule.jpg",
+        after_keep: "renders_3d/villers_3d_01_entree_fleurie_seule.jpg",
+        hasWallOption: false,
+        hasKitchenOption: false,
+        ref: "Dépose papier peint fleuri + Peinture F&B School House White N°291 + Parquet poncé",
+        price: "480 € TTC (peinture & boiseries entrée)"
+      }
+    };
+
+    const KITCHENS = {
+      ikea: {
+        name: "IKEA Metod Voxtorp Blanc Mat & Chêne Karlby",
+        price: "2 850 € TTC (fourniture complète IKEA Caen)"
+      },
+      plum: {
+        name: "Plum Living Craie / Vert Sauge & Zellige 10×10",
+        price: "4 200 € TTC (façades Plum + caissons Metod)"
+      },
+      delinia: {
+        name: "Leroy Merlin Delinia iD Sevilla Blanc & Pierre",
+        price: "3 400 € TTC (fourniture complète garantie 25 ans)"
+      }
+    };
+
+    const PAINTS = {
+      wimborne: { name: "F&B Wimborne White N°239", color: "transparent", opacity: 0, filter: "none" },
+      schoolhouse: { name: "F&B School House Lin N°291", color: "#EFE6D5", opacity: 0.16, filter: "sepia(0.08) brightness(0.99)" },
+      sauge: { name: "F&B Vert de Terre N°234", color: "#C5D6C2", opacity: 0.18, filter: "hue-rotate(15deg) saturate(0.95)" },
+      denimes: { name: "F&B De Nimes N°299", color: "#BFD2DE", opacity: 0.18, filter: "hue-rotate(-12deg) saturate(0.95)" }
+    };
+
+    let state = {
+      room: "cuisine",
+      wall: "open_bar",
+      kitchen: "ikea",
+      paint: "wimborne",
+      floor: "pin_clair",
+      compareMode: "split",
+      splitPct: 38
+    };
+
+    function updateUI() {
+      const r = ROOMS[state.room];
+      const imgBefore = document.getElementById("img-before");
+      const imgAfter = document.getElementById("img-after");
+      imgBefore.src = r.before;
+      imgAfter.src = (state.wall === "open_bar") ? r.after_open : r.after_keep;
+
+      document.getElementById("block-travaux").style.display = r.hasWallOption ? "block" : "none";
+      document.getElementById("block-cuisine").style.display = r.hasKitchenOption ? "block" : "none";
+
+      // Paint tint
+      const p = PAINTS[state.paint];
+      const tint = document.getElementById("tint-overlay");
+      tint.style.backgroundColor = p.color;
+      tint.style.opacity = (state.room === "entree") ? Math.max(0.28, p.opacity) : p.opacity;
+      imgAfter.style.filter = (state.room === "entree")
+        ? "saturate(0.25) brightness(1.18) contrast(0.92)"
+        : p.filter;
+
+      // Tags & Summary
+      const k = KITCHENS[state.kitchen];
+      const tagAfter = document.getElementById("tag-after");
+      if (state.room === "cuisine") {
+        const wallTxt = (state.wall === "open_bar") ? "Bar Américain Ouvert" : "Cloison Conservée";
+        tagAfter.textContent = `Projet • ${wallTxt}`;
+        document.getElementById("active-ref-summary").innerHTML = `<strong>${r.title}</strong> • ${k.name}`;
+        document.getElementById("ref-line").textContent = `${k.name} • ${wallTxt} • ${p.name}`;
+        document.getElementById("price-line").textContent = k.price;
+      } else {
+        tagAfter.textContent = `Projet • ${p.name}`;
+        document.getElementById("active-ref-summary").innerHTML = `<strong>${r.title}</strong> • ${p.name}`;
+        document.getElementById("ref-line").textContent = r.ref;
+        document.getElementById("price-line").textContent = r.price;
+      }
+
+      applySplitPosition(state.splitPct);
+    }
+
+    function applySplitPosition(pct) {
+      state.splitPct = Math.max(0, Math.min(100, pct));
+      const beforeClip = document.getElementById("before-clip");
+      const sliderLine = document.getElementById("slider-line");
+      const tagBefore = document.getElementById("tag-before");
+      const tagAfter = document.getElementById("tag-after");
+
+      if (state.compareMode === "after") {
+        beforeClip.style.clipPath = `inset(0 100% 0 0)`;
+        sliderLine.style.display = "none";
+        tagBefore.style.display = "none";
+        tagAfter.style.display = "block";
+      } else if (state.compareMode === "before") {
+        beforeClip.style.clipPath = `inset(0 0% 0 0)`;
+        sliderLine.style.display = "none";
+        tagBefore.style.display = "block";
+        tagAfter.style.display = "none";
+      } else {
+        beforeClip.style.clipPath = `inset(0 ${100 - state.splitPct}% 0 0)`;
+        sliderLine.style.display = "block";
+        sliderLine.style.left = state.splitPct + "%";
+        tagBefore.style.display = state.splitPct > 12 ? "block" : "none";
+        tagAfter.style.display = state.splitPct < 88 ? "block" : "none";
+      }
+    }
+
+    window.setCompareMode = function(mode) {
+      state.compareMode = mode;
+      ["split", "after", "before"].forEach(m => {
+        document.getElementById("mode-" + m).classList.toggle("active", m === mode);
+      });
+      applySplitPosition(state.splitPct);
+    };
+
+    window.selectRoom = function(room) {
+      state.room = room;
+      document.querySelectorAll("[data-room]").forEach(b => b.classList.toggle("active", b.dataset.room === room));
+      updateUI();
+    };
+
+    window.selectWallOption = function(wall) {
+      state.wall = wall;
+      document.querySelectorAll("[data-wall]").forEach(b => b.classList.toggle("active", b.dataset.wall === wall));
+      updateUI();
+    };
+
+    window.selectKitchen = function(kitchen) {
+      state.kitchen = kitchen;
+      document.querySelectorAll("[data-kitchen]").forEach(b => b.classList.toggle("active", b.dataset.kitchen === kitchen));
+      if ( kitchen === "plum" ) selectPaint("sauge");
+      else if ( kitchen === "delinia" ) selectPaint("schoolhouse");
+      else selectPaint("wimborne");
+      updateUI();
+    };
+
+    window.selectPaint = function(paint) {
+      state.paint = paint;
+      document.querySelectorAll("[data-paint]").forEach(b => b.classList.toggle("active", b.dataset.paint === paint));
+      updateUI();
+    };
+
+    window.selectFloor = function(floor) {
+      state.floor = floor;
+      document.querySelectorAll("[data-floor]").forEach(b => b.classList.toggle("active", b.dataset.floor === floor));
+      updateUI();
+    };
+
+    window.handleLidarImport = function(input) {
+      if (input.files && input.files[0]) {
+        const f = input.files[0];
+        document.getElementById("ref-line").textContent = `Scan LiDAR importé : ${f.name}`;
+        document.getElementById("price-line").textContent = "Volume 3D calibré prêt";
+      }
+    };
+
+    // Drag slider interaction
+    const viewport = document.getElementById("compare-viewport");
+    let dragging = false;
+    function moveSlider(clientX) {
+      const rect = viewport.getBoundingClientRect();
+      const pct = ((clientX - rect.left) / rect.width) * 100;
+      if (state.compareMode !== "split") window.setCompareMode("split");
+      applySplitPosition(pct);
+    }
+    viewport.addEventListener("pointerdown", (e) => {
+      dragging = true;
+      moveSlider(e.clientX);
+    });
+    window.addEventListener("pointermove", (e) => {
+      if (!dragging) return;
+      moveSlider(e.clientX);
+    });
+    window.addEventListener("pointerup", () => {
+      dragging = false;
+    });
+
+    updateUI();
+  </script>
+</body>
+</html>
